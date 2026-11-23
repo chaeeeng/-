@@ -1,0 +1,1056 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EAST ASIA AGRILINK AI — 동아시아 Cfa 기후권 스마트팜 AI 최적화 플랫폼</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Noto+Sans+KR:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', 'Noto Sans KR', -apple-system, BlinkMacSystemFont, sans-serif;
+            background-color: #f8fafc;
+            color: #0f172a;
+        }
+        /* 커스텀 슬라이더 디자인 */
+        input[type="range"] {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 100%;
+            height: 8px;
+            background: #e2e8f0;
+            border-radius: 9999px;
+            outline: none;
+            cursor: pointer;
+        }
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 22px;
+            height: 22px;
+            border-radius: 50%;
+            background: #059669;
+            border: 3px solid #ffffff;
+            box-shadow: 0 2px 6px rgba(5, 150, 105, 0.45);
+            transition: transform 0.15s ease, background-color 0.15s ease;
+        }
+        input[type="range"]::-webkit-slider-thumb:hover {
+            transform: scale(1.12);
+            background: #047857;
+        }
+        input[type="range"]::-moz-range-thumb {
+            width: 22px;
+            height: 22px;
+            border-radius: 50%;
+            background: #059669;
+            border: 3px solid #ffffff;
+            box-shadow: 0 2px 6px rgba(5, 150, 105, 0.45);
+        }
+        .canvas-wrapper {
+            position: relative;
+            width: 100%;
+            overflow: hidden;
+        }
+    </style>
+</head>
+<body class="min-h-screen pb-12 antialiased">
+
+    <!-- 상단 헤더 (우측 상단 데이터 건수 표기 완전 제거) -->
+    <header class="bg-white border-b border-slate-200 sticky top-0 z-30 shadow-sm">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+            <div class="flex items-center gap-3.5">
+                <div class="w-11 h-11 rounded-xl bg-gradient-to-br from-emerald-600 to-teal-700 flex items-center justify-center text-white font-extrabold text-base tracking-tight shadow-sm shrink-0">
+                    AI
+                </div>
+                <div>
+                    <div class="flex items-center gap-2 flex-wrap">
+                        <h1 class="text-lg sm:text-xl font-extrabold text-slate-900 tracking-tight">EAST ASIA AGRILINK AI</h1>
+                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200">
+                            PSO 환경 최적화 엔진
+                        </span>
+                    </div>
+                    <p class="text-xs sm:text-sm text-slate-500 mt-0.5">동아시아 Cfa(온난 습윤 기후) 스마트팜 데이터 분석 및 PSO 기반 최적 운영전략 플랫폼</p>
+                </div>
+            </div>
+
+            <!-- 깔끔한 대상 작물 태그만 유지 -->
+            <div class="flex items-center gap-2 text-xs font-semibold text-emerald-800 bg-emerald-50/80 border border-emerald-200 px-3.5 py-2 rounded-xl self-start sm:self-auto shrink-0">
+                <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+                <span>대상 작물: 시설 토마토 (수경재배)</span>
+            </div>
+        </div>
+    </header>
+
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-6 space-y-6">
+
+        <!-- 3개 메인 네비게이션 탭 -->
+        <nav class="grid grid-cols-1 md:grid-cols-3 gap-3">
+            <button id="tab-btn-1" onclick="switchTab(1)" class="tab-btn px-4 py-3.5 rounded-xl font-bold text-sm border transition-all text-left sm:text-center bg-white text-slate-600 border-slate-200 hover:border-emerald-400">
+                1. 동아시아 Cfa 기후 지도 & 전략 적용 권역
+            </button>
+            <button id="tab-btn-2" onclick="switchTab(2)" class="tab-btn px-4 py-3.5 rounded-xl font-bold text-sm border transition-all text-left sm:text-center bg-white text-slate-600 border-slate-200 hover:border-emerald-400">
+                2. 한국 Cfa권 실측 데이터 시각화 분석
+            </button>
+            <button id="tab-btn-3" onclick="switchTab(3)" class="tab-btn px-4 py-3.5 rounded-xl font-bold text-sm border transition-all text-left sm:text-center bg-emerald-600 text-white border-emerald-600 shadow-md">
+                3. 일본 농가 맞춤형 PSO 운영전략 시뮬레이터
+            </button>
+        </nav>
+
+        <!-- ======================================================================= -->
+        <!-- TAB 1: 동아시아 Cfa 기후 지도 & 전략 적용 권역 (순수 SVG 인터랙티브 지도) -->
+        <!-- ======================================================================= -->
+        <section id="tab-content-1" class="hidden space-y-6">
+            <div class="bg-white rounded-2xl p-6 border border-slate-200 shadow-sm">
+                <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-4 mb-6">
+                    <div>
+                        <span class="inline-block px-3 py-1 rounded-full text-xs font-bold bg-emerald-50 text-emerald-700 border border-emerald-200 mb-2">
+                            Köppen-Geiger 기후 분류 · 온난 습윤 기후(Cfa) 상동성 매핑
+                        </span>
+                        <h2 class="text-xl font-bold text-slate-900">동아시아 Cfa 기후권 스마트팜 모델 확장 권역</h2>
+                        <p class="text-sm text-slate-500 mt-1">한국 남부(전남·전북·부산·제주) Cfa 실측 데이터로 검증된 환경 제어 모델을 동일 기후권인 일본 규슈 및 중국 남동부 농가에 전이 적용합니다.</p>
+                    </div>
+                    <div class="flex flex-wrap gap-2 text-xs">
+                        <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-emerald-50 text-emerald-800 font-semibold border border-emerald-200">
+                            <span class="w-2.5 h-2.5 rounded-full bg-emerald-600"></span> 한국 실측 학습 권역
+                        </span>
+                        <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-sky-50 text-sky-800 font-semibold border border-sky-200">
+                            <span class="w-2.5 h-2.5 rounded-full bg-sky-500"></span> 일본 규슈 타겟 농가
+                        </span>
+                        <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-amber-50 text-amber-800 font-semibold border border-amber-200">
+                            <span class="w-2.5 h-2.5 rounded-full bg-amber-500"></span> 중국 남동부 확장 권역
+                        </span>
+                    </div>
+                </div>
+
+                <!-- 오프라인/모바일 100% 호환 동아시아 Cfa 기후 지도 SVG -->
+                <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-stretch">
+                    <div class="lg:col-span-7 bg-slate-900 rounded-2xl p-4 border border-slate-800 relative overflow-hidden flex flex-col justify-between">
+                        <div class="flex items-center justify-between text-xs text-slate-300 mb-2 px-1">
+                            <span class="font-bold text-emerald-400">EAST ASIA Cfa CLIMATE BELT (30°N ~ 37°N)</span>
+                            <span>클릭하여 권역별 전략 확인</span>
+                        </div>
+                        <svg viewBox="0 0 640 380" class="w-full h-auto rounded-xl bg-[#0f172a]">
+                            <!-- 위경도 그리드 라인 -->
+                            <g stroke="#1e293b" stroke-width="1" stroke-dasharray="4,4">
+                                <line x1="0" y1="76" x2="640" y2="76"/>
+                                <line x1="0" y1="152" x2="640" y2="152"/>
+                                <line x1="0" y1="228" x2="640" y2="228"/>
+                                <line x1="0" y1="304" x2="640" y2="304"/>
+                                <line x1="128" y1="0" x2="128" y2="380"/>
+                                <line x1="256" y1="0" x2="256" y2="380"/>
+                                <line x1="384" y1="0" x2="384" y2="380"/>
+                                <line x1="512" y1="0" x2="512" y2="380"/>
+                            </g>
+
+                            <!-- 동아시아 Cfa 기후 벨트 음영 영역 -->
+                            <path d="M 40,210 Q 180,185 330,170 T 590,145 L 605,245 Q 430,275 270,295 T 30,340 Z"
+                                  fill="rgba(16, 185, 129, 0.14)" stroke="#10b981" stroke-width="1.5" stroke-dasharray="6,4"/>
+                            <text x="455" y="135" fill="#34d399" font-size="11" font-weight="700">온난 습윤 기후(Cfa) 벨트</text>
+
+                            <!-- 중국 동부 해안 지형 윤곽 -->
+                            <path d="M 20,60 L 145,65 L 165,115 L 130,145 L 175,185 L 160,255 L 115,320 L 20,345 Z"
+                                  fill="#1e293b" stroke="#334155" stroke-width="1.5"/>
+                            <text x="55" y="130" fill="#64748b" font-size="12" font-weight="700">CHINA (중국)</text>
+
+                            <!-- 한반도 남부 & 제주도 윤곽 -->
+                            <path d="M 265,75 L 325,80 L 340,145 L 325,185 L 275,192 L 265,150 Z"
+                                  fill="#1e293b" stroke="#334155" stroke-width="1.5"/>
+                            <!-- 제주도 -->
+                            <ellipse cx="278" cy="216" rx="14" ry="7" fill="#059669" fill-opacity="0.45" stroke="#10b981" stroke-width="1.5"/>
+                            <text x="275" y="115" fill="#94a3b8" font-size="11" font-weight="700">KOREA</text>
+
+                            <!-- 일본 규슈 & 혼슈 남부 윤곽 -->
+                            <path d="M 405,195 L 435,185 L 445,235 L 412,248 Z"
+                                  fill="#1e293b" stroke="#0284c7" stroke-width="1.5"/>
+                            <path d="M 442,175 L 545,135 L 595,148 L 575,175 L 460,192 Z"
+                                  fill="#1e293b" stroke="#334155" stroke-width="1.5"/>
+                            <text x="495" y="125" fill="#94a3b8" font-size="11" font-weight="700">JAPAN (일본)</text>
+
+                            <!-- 데이터·전략 전이 연결선 -->
+                            <path d="M 295,182 Q 360,175 422,208" fill="none" stroke="#38bdf8" stroke-width="2.5" stroke-dasharray="5,4"/>
+                            <path d="M 295,182 Q 220,205 152,235" fill="none" stroke="#fbbf24" stroke-width="2" stroke-dasharray="4,4"/>
+
+                            <!-- 거점 1: 한국 전남·전북·부산 Cfa 실측 거점 -->
+                            <g class="cursor-pointer" onclick="selectRegion('korea')">
+                                <circle cx="295" cy="182" r="16" fill="#10b981" fill-opacity="0.28"/>
+                                <circle cx="295" cy="182" r="7" fill="#10b981" stroke="#ffffff" stroke-width="2"/>
+                                <rect x="210" y="148" width="128" height="22" rx="6" fill="#065f46"/>
+                                <text x="274" y="163" text-anchor="middle" fill="#ffffff" font-size="10.5" font-weight="700">한국 전남·전북·부산·제주</text>
+                            </g>
+
+                            <!-- 거점 2: 일본 규슈 구마모토 (사토 농부) -->
+                            <g class="cursor-pointer" onclick="selectRegion('japan')">
+                                <circle cx="422" cy="208" r="18" fill="#0ea5e9" fill-opacity="0.32"/>
+                                <circle cx="422" cy="208" r="7.5" fill="#0284c7" stroke="#ffffff" stroke-width="2"/>
+                                <rect x="436" y="200" width="152" height="24" rx="6" fill="#0369a1"/>
+                                <text x="512" y="216" text-anchor="middle" fill="#ffffff" font-size="10.5" font-weight="700">일본 규슈 구마모토 (타겟)</text>
+                            </g>
+
+                            <!-- 거점 3: 중국 남동부 Cfa 확장 권역 -->
+                            <g class="cursor-pointer" onclick="selectRegion('china')">
+                                <circle cx="152" cy="235" r="15" fill="#f59e0b" fill-opacity="0.28"/>
+                                <circle cx="152" cy="235" r="7" fill="#d97706" stroke="#ffffff" stroke-width="2"/>
+                                <rect x="52" y="252" width="145" height="22" rx="6" fill="#92400e"/>
+                                <text x="124" y="267" text-anchor="middle" fill="#ffffff" font-size="10.5" font-weight="700">중국 남동부 (저장·푸젠성)</text>
+                            </g>
+                        </svg>
+                    </div>
+
+                    <!-- 우측 권역별 상세 카드 3개 -->
+                    <div class="lg:col-span-5 flex flex-col justify-between gap-3.5">
+                        <div id="region-card-korea" onclick="selectRegion('korea')" class="cursor-pointer p-4 rounded-xl border-2 border-emerald-500 bg-emerald-50/60 transition">
+                            <div class="flex items-center justify-between mb-1">
+                                <span class="text-xs font-extrabold text-emerald-700">SOURCE · 기준 학습 권역</span>
+                                <span class="px-2 py-0.5 rounded bg-emerald-600 text-white text-[11px] font-bold">기준 100%</span>
+                            </div>
+                            <h3 class="text-base font-bold text-slate-900">한국 전남(화순)·전북·부산·제주 Cfa 권역</h3>
+                            <p class="text-xs text-slate-600 mt-1.5 leading-relaxed">
+                                • <strong>기후 특성:</strong> 연평균 기온 14~16°C, 여름 고온다습 및 겨울·새벽 복사냉각 과습(91~96%) 발생.<br>
+                                • <strong>모델 역할:</strong> 국내 스마트팜 실측 센서를 기반으로 환기·관수 제어에 따른 온·습도 및 VPD 변화율 모델 학습.
+                            </p>
+                        </div>
+
+                        <div id="region-card-japan" onclick="selectRegion('japan')" class="cursor-pointer p-4 rounded-xl border border-slate-200 bg-sky-50/50 hover:border-sky-400 transition">
+                            <div class="flex items-center justify-between mb-1">
+                                <span class="text-xs font-extrabold text-sky-700">TARGET 1 · 핵심 실증 농가</span>
+                                <span class="px-2 py-0.5 rounded bg-sky-600 text-white text-[11px] font-bold">기후 유사도 94.2%</span>
+                            </div>
+                            <h3 class="text-base font-bold text-slate-900">일본 규슈 (구마모토 사토 농부 농장)</h3>
+                            <p class="text-xs text-slate-600 mt-1.5 leading-relaxed">
+                                • <strong>기후 특성:</strong> 한국 남부·제주와 동일한 Cfa 기후대로 분지형 새벽 과습과 주간 강한 일사가 공존.<br>
+                                • <strong>적용 전략:</strong> 새벽 결로 방지 제습 환기 및 개화·착과기 최적 VPD(0.8~1.0 kPa) 맞춤형 제어 적용.
+                            </p>
+                        </div>
+
+                        <div id="region-card-china" onclick="selectRegion('china')" class="cursor-pointer p-4 rounded-xl border border-slate-200 bg-amber-50/50 hover:border-amber-400 transition">
+                            <div class="flex items-center justify-between mb-1">
+                                <span class="text-xs font-extrabold text-amber-700">TARGET 2 · 동아시아 확장 벨트</span>
+                                <span class="px-2 py-0.5 rounded bg-amber-600 text-white text-[11px] font-bold">기후 유사도 89.5%</span>
+                            </div>
+                            <h3 class="text-base font-bold text-slate-900">중국 남동부 (저장성·푸젠성·장쑤성 남부)</h3>
+                            <p class="text-xs text-slate-600 mt-1.5 leading-relaxed">
+                                • <strong>기후 특성:</strong> 장기간 고온 다습한 여름철과 환절기 높은 상대습도로 곰팡이병 및 고온 스트레스 빈발.<br>
+                                • <strong>적용 전략:</strong> 고온기 최대 환기 스케줄링과 증발산량 기반 정밀 관수량 산출 모델 확장 적용.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ======================================================================= -->
+        <!-- TAB 2: 한국 Cfa권 실측 데이터 시각화 분석 (순수 고해상도 HTML5 Canvas) -->
+        <!-- ======================================================================= -->
+        <section id="tab-content-2" class="hidden space-y-6">
+            <div class="bg-white rounded-2xl p-6 border border-slate-200 shadow-sm">
+                <div class="flex flex-col md:flex-row md:items-center justify-between gap-3 mb-6">
+                    <div>
+                        <span class="inline-block px-3 py-1 rounded-full text-xs font-bold bg-emerald-50 text-emerald-700 border border-emerald-200 mb-2">
+                            한국 Cfa 권역 (전남·전북·부산) 실측 데이터 분석
+                        </span>
+                        <h2 class="text-xl font-bold text-slate-900">시설 토마토(수경재배) 시간대별 온·습도 및 VPD 패턴 분석</h2>
+                        <p class="text-sm text-slate-500 mt-1">실측 환경 데이터에서 추출한 24시간 일변화 추이와 농촌진흥청 VPD 적정 기준(0.5~1.2 kPa) 대비 구간 분포입니다.</p>
+                    </div>
+                    <div class="bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-xs text-slate-600 space-y-1 shrink-0">
+                        <div>• <strong>핵심 문제 1:</strong> 새벽(00~06시) 습도 91~96% · VPD 0.06~0.35 kPa 결로 위험</div>
+                        <div>• <strong>핵심 문제 2:</strong> 한낮(12~14시) VPD 1.6 kPa 초과 고온 건조 스트레스</div>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    <!-- 차트 1: 시간대별 내부온도·습도·VPD 일변화 -->
+                    <div class="p-5 rounded-2xl border border-slate-200 bg-slate-50/50 flex flex-col justify-between">
+                        <div class="flex items-center justify-between mb-3">
+                            <h3 class="text-sm font-bold text-slate-900">1) 시간대별(00~23시) 내부온도 · 습도 · VPD 일변화 추이</h3>
+                            <span class="text-[11px] font-bold px-2.5 py-0.5 rounded-full bg-rose-100 text-rose-700">새벽 과습 & 한낮 고온</span>
+                        </div>
+                        <div class="canvas-wrapper bg-white rounded-xl border border-slate-200 p-2">
+                            <canvas id="diurnalCanvas" style="width:100%; height:270px; display:block;"></canvas>
+                        </div>
+                        <p class="mt-3 text-xs text-slate-600 leading-relaxed">
+                            <strong>해석:</strong> 새벽(00~06시) 기온이 13~14°C로 내려가면서 상대습도가 <strong>91~96%</strong>까지 급등해 VPD가 <strong>0.06~0.35 kPa</strong>(곰팡이·결로 위험 구간)로 떨어지며, 한낮에는 VPD가 <strong>1.6 kPa 이상</strong> 치솟아 기공 폐쇄 스트레스를 유발합니다.
+                        </p>
+                    </div>
+
+                    <!-- 차트 2: 농촌진흥청 VPD 기준 대비 분포 -->
+                    <div class="p-5 rounded-2xl border border-slate-200 bg-slate-50/50 flex flex-col justify-between">
+                        <div class="flex items-center justify-between mb-3">
+                            <h3 class="text-sm font-bold text-slate-900">2) 농촌진흥청 VPD 적정 기준(0.5~1.2 kPa) 대비 구간 비율</h3>
+                            <span class="text-[11px] font-bold px-2.5 py-0.5 rounded-full bg-emerald-100 text-emerald-700">적정 구간 38.4% 불과</span>
+                        </div>
+                        <div class="canvas-wrapper bg-white rounded-xl border border-slate-200 p-2">
+                            <canvas id="vpdDistCanvas" style="width:100%; height:270px; display:block;"></canvas>
+                        </div>
+                        <p class="mt-3 text-xs text-slate-600 leading-relaxed">
+                            <strong>해석:</strong> 전체 관측 시간 중 농진청 적정 구간(0.5~1.2 kPa)은 <strong>38.4%</strong>에 그쳤으며, <strong>46.8%가 과습 구간(&lt;0.5 kPa)</strong>, <strong>14.8%가 건조 구간(&gt;1.2 kPa)</strong>으로 나타나 AI 기반 관수·환기 최적화가 필수적입니다.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ======================================================================= -->
+        <!-- TAB 3: 일본 농가 맞춤형 PSO 운영전략 시뮬레이터 (기본 활성 탭) -->
+        <!-- ======================================================================= -->
+        <section id="tab-content-3" class="space-y-6">
+            <div class="bg-white rounded-2xl p-6 border border-slate-200 shadow-sm">
+                
+                <!-- 상단 타이틀 & 2개 프리셋 버튼 -->
+                <div class="flex flex-col xl:flex-row xl:items-center justify-between gap-4 pb-5 border-b border-slate-100">
+                    <div>
+                        <span class="inline-block px-3 py-1 rounded-full text-xs font-bold bg-emerald-50 text-emerald-700 border border-emerald-200 mb-2">
+                            AI 알고리즘: 입자 군집 최적화 (Particle Swarm Optimization)
+                        </span>
+                        <h2 class="text-xl sm:text-2xl font-bold text-slate-900">일본 규슈(사토 켄지 농장) 맞춤형 최적 관수량 · 환기 시간 탐색기</h2>
+                        <p class="text-sm text-slate-500 mt-1">한국 Cfa권 데이터로 검증된 환경 반응 모델을 바탕으로, 일본 농가의 현재 센서 값을 입력하면 30개 입자가 40세대 탐색을 거쳐 최적 관수량과 환기 시간을 산출합니다.</p>
+                    </div>
+
+                    <div class="flex flex-wrap gap-2.5 shrink-0">
+                        <button onclick="applyPreset('dawn')" class="px-4 py-2.5 rounded-xl text-xs font-bold bg-sky-50 text-sky-700 border border-sky-200 hover:bg-sky-100 active:scale-[0.98] transition shadow-sm">
+                            프리셋: 구마모토 새벽 과습 (05시)
+                        </button>
+                        <button onclick="applyPreset('noon')" class="px-4 py-2.5 rounded-xl text-xs font-bold bg-rose-50 text-rose-700 border border-rose-200 hover:bg-rose-100 active:scale-[0.98] transition shadow-sm">
+                            프리셋: 규슈 여름 한낮 고온 (13시)
+                        </button>
+                    </div>
+                </div>
+
+                <!-- 공공 농업기술 목표 기준 요약 배너 -->
+                <div class="mt-5 p-4 rounded-xl bg-slate-50 border border-slate-200 grid grid-cols-1 lg:grid-cols-2 gap-3 text-xs">
+                    <div class="flex items-start gap-2.5">
+                        <span class="px-2 py-0.5 rounded bg-emerald-600 text-white font-bold shrink-0 mt-0.5">기준 1</span>
+                        <div>
+                            <div class="font-bold text-slate-800">농촌진흥청 국립원예특작과학원 「수증기압포차(VPD) 생육 적정 기준」</div>
+                            <div class="text-slate-600 mt-0.5">일반 생육 적정 <strong class="text-emerald-700">0.5 ~ 1.2 kPa</strong> · 개화·착과기 최적 목표 <strong class="text-emerald-700">0.85 kPa (0.8~1.0 kPa)</strong> (0.4 kPa 이하 결로·1.5 kPa 이상 기공 폐쇄 페널티)</div>
+                        </div>
+                    </div>
+                    <div class="flex items-start gap-2.5">
+                        <span class="px-2 py-0.5 rounded bg-teal-600 text-white font-bold shrink-0 mt-0.5">기준 2</span>
+                        <div>
+                            <div class="font-bold text-slate-800">스마트팜코리아 「월별 토마토 재배가이드」</div>
+                            <div class="text-slate-600 mt-0.5">주간 적온 <strong class="text-teal-700">23~26°C (습도 60~70%)</strong> · 야간 변온 <strong class="text-teal-700">11~15°C (습도 80~90% 이내)</strong> · 근권 지습 목표 <strong class="text-teal-700">55~65%</strong></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 메인 시뮬레이터 좌·우 2단 레이아웃 -->
+                <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 mt-6">
+                    
+                    <!-- 좌측 입력 패널 (5칸) -->
+                    <div class="lg:col-span-5 bg-slate-50/80 rounded-2xl p-5 border border-slate-200 flex flex-col justify-between space-y-5">
+                        <div class="space-y-4">
+                            <div class="flex items-center justify-between">
+                                <h3 class="text-base font-bold text-slate-900">현재 온실 환경 센서 입력</h3>
+                                <span id="mode-indicator" class="text-[11px] font-bold px-2.5 py-1 rounded-full bg-emerald-100 text-emerald-800">
+                                    주간 광합성 제어 모드
+                                </span>
+                            </div>
+
+                            <!-- 슬라이더 1: 내부 온도 -->
+                            <div>
+                                <div class="flex justify-between text-xs font-bold mb-1.5">
+                                    <span class="text-slate-700">내부 온도 (°C)</span>
+                                    <span id="val-temp" class="text-emerald-600 text-sm font-extrabold">28.5 °C</span>
+                                </div>
+                                <input type="range" id="input-temp" min="10" max="42" step="0.5" value="28.5" oninput="onSliderChange()">
+                                <div class="flex justify-between text-[10px] text-slate-400 mt-1">
+                                    <span>10.0°C (야간저온)</span>
+                                    <span>25.0°C (생육적온)</span>
+                                    <span>42.0°C (한낮고온)</span>
+                                </div>
+                            </div>
+
+                            <!-- 슬라이더 2: 내부 상대습도 -->
+                            <div>
+                                <div class="flex justify-between text-xs font-bold mb-1.5">
+                                    <span class="text-slate-700">내부 상대습도 (%)</span>
+                                    <span id="val-humid" class="text-emerald-600 text-sm font-extrabold">82 %</span>
+                                </div>
+                                <input type="range" id="input-humid" min="30" max="98" step="1" value="82" oninput="onSliderChange()">
+                                <div class="flex justify-between text-[10px] text-slate-400 mt-1">
+                                    <span>30% (건조)</span>
+                                    <span>65% (주간적정)</span>
+                                    <span>98% (새벽과습)</span>
+                                </div>
+                            </div>
+
+                            <!-- 슬라이더 3: 외부 일사량 -->
+                            <div>
+                                <div class="flex justify-between text-xs font-bold mb-1.5">
+                                    <span class="text-slate-700">외부 일사량 (W/m²)</span>
+                                    <span id="val-solar" class="text-emerald-600 text-sm font-extrabold">420 W/m²</span>
+                                </div>
+                                <input type="range" id="input-solar" min="0" max="900" step="10" value="420" oninput="onSliderChange()">
+                                <div class="flex justify-between text-[10px] text-slate-400 mt-1">
+                                    <span>0 W/m² (새벽·야간)</span>
+                                    <span>450 W/m²</span>
+                                    <span>900 W/m² (강광)</span>
+                                </div>
+                            </div>
+
+                            <!-- 슬라이더 4: 현재 근권 지습 -->
+                            <div>
+                                <div class="flex justify-between text-xs font-bold mb-1.5">
+                                    <span class="text-slate-700">현재 근권 지습 (%)</span>
+                                    <span id="val-soil" class="text-emerald-600 text-sm font-extrabold">35 %</span>
+                                </div>
+                                <input type="range" id="input-soil" min="10" max="80" step="1" value="35" oninput="onSliderChange()">
+                                <div class="flex justify-between text-[10px] text-slate-400 mt-1">
+                                    <span>10% (관수필요)</span>
+                                    <span>55% (적정수분)</span>
+                                    <span>80% (과습)</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- PSO 실행 버튼 -->
+                        <button onclick="executePSO(true)" class="w-full py-3.5 px-4 rounded-xl bg-emerald-700 hover:bg-emerald-800 active:scale-[0.99] text-white font-bold text-sm shadow-md transition flex items-center justify-center gap-2">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+                            <span>PSO 최적 운영전략 실행 (30 Particles × 40 Iter)</span>
+                        </button>
+                    </div>
+
+                    <!-- 우측 결과 카드 & PSO 수렴 곡선 그래프 (7칸) -->
+                    <div class="lg:col-span-7 flex flex-col justify-between space-y-5">
+                        
+                        <!-- 3개 추천 결과 카드 -->
+                        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                            <!-- 카드 1: PSO 추천 관수량 -->
+                            <div class="rounded-2xl p-4 bg-emerald-50/75 border border-emerald-200 flex flex-col justify-between">
+                                <span class="text-xs font-bold text-emerald-800">PSO 추천 관수량</span>
+                                <div class="my-2">
+                                    <span id="res-irrigation" class="text-3xl font-extrabold text-slate-900">28</span>
+                                    <span class="text-sm font-bold text-slate-700 ml-1">mL/주</span>
+                                </div>
+                                <p class="text-[11px] font-medium text-emerald-700">1회 공급 기준 · 일사·지습 반영</p>
+                            </div>
+
+                            <!-- 카드 2: PSO 추천 환기 지속시간 -->
+                            <div class="rounded-2xl p-4 bg-teal-50/75 border border-teal-200 flex flex-col justify-between">
+                                <span class="text-xs font-bold text-teal-800">PSO 추천 환기 지속시간</span>
+                                <div class="my-2">
+                                    <span id="res-ventilation" class="text-3xl font-extrabold text-slate-900">42</span>
+                                    <span class="text-sm font-bold text-slate-700 ml-1">분/시간</span>
+                                </div>
+                                <p class="text-[11px] font-medium text-teal-700">측·천창 연동 제습·냉각</p>
+                            </div>
+
+                            <!-- 카드 3: 예측 VPD 개선 결과 -->
+                            <div class="rounded-2xl p-4 bg-indigo-50/75 border border-indigo-200 flex flex-col justify-between">
+                                <span class="text-xs font-bold text-indigo-800">예측 VPD 개선 결과</span>
+                                <div class="my-2 flex items-baseline flex-wrap gap-1">
+                                    <span id="res-vpd-before" class="text-xl font-extrabold text-slate-500">0.70</span>
+                                    <span class="text-sm font-bold text-indigo-600">→</span>
+                                    <span id="res-vpd-after" class="text-2xl font-extrabold text-indigo-950">0.88</span>
+                                    <span class="text-xs font-bold text-indigo-800">kPa</span>
+                                </div>
+                                <p id="res-vpd-status" class="text-[11px] font-bold text-indigo-700">토마토 최적 구간(0.8~1.0) 도달</p>
+                            </div>
+                        </div>
+
+                        <!-- PSO 목적함수 세대별 수렴 곡선 (순수 HTML5 Canvas로 100% 확실한 렌더링) -->
+                        <div class="bg-white rounded-2xl p-5 border border-slate-200 shadow-sm flex-1 flex flex-col justify-between">
+                            <div class="flex flex-wrap items-center justify-between gap-2 mb-3">
+                                <div>
+                                    <h4 class="text-sm font-bold text-slate-900">PSO 목적함수(손실 오차) 세대별 수렴 곡선</h4>
+                                    <p class="text-[11px] text-slate-500">관성 가중치 감쇠(w: 0.90 → 0.40) · 30개 입자의 전역 최적 손실 오차(gBest Loss) 감소 추이</p>
+                                </div>
+                                <div class="flex items-center gap-2">
+                                    <span class="text-xs font-bold text-emerald-700 bg-emerald-50 border border-emerald-200 px-3 py-1 rounded-lg">
+                                        최종 오차: <strong id="final-loss-text">0.0412</strong>
+                                    </span>
+                                </div>
+                            </div>
+
+                            <!-- 고해상도 Canvas 컨테이너 + 인터랙티브 툴팁 -->
+                            <div id="pso-canvas-container" class="canvas-wrapper rounded-xl border border-slate-100 bg-slate-50/40 relative">
+                                <canvas id="psoCanvas" style="width:100%; height:235px; display:block;"></canvas>
+                                <div id="pso-tooltip" class="hidden pointer-events-none absolute z-10 bg-slate-900/95 text-white text-[11px] font-semibold px-2.5 py-1.5 rounded-lg shadow-lg whitespace-nowrap"></div>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <script>
+        // =========================================================================
+        // 1. 전역 상태 변수
+        // =========================================================================
+        let currentTab = 3;
+        let latestPsoHistory = [];
+        let psoChartPoints = []; // 마우스/터치 툴팁용 좌표 캐시
+
+        // =========================================================================
+        // 2. 탭 전환 및 권역 선택 로직
+        // =========================================================================
+        function switchTab(tabIndex) {
+            currentTab = tabIndex;
+            for (let i = 1; i <= 3; i++) {
+                const contentEl = document.getElementById(`tab-content-${i}`);
+                const btnEl = document.getElementById(`tab-btn-${i}`);
+                if (i === tabIndex) {
+                    contentEl.classList.remove('hidden');
+                    btnEl.className = 'tab-btn px-4 py-3.5 rounded-xl font-bold text-sm border transition-all text-left sm:text-center bg-emerald-600 text-white border-emerald-600 shadow-md';
+                } else {
+                    contentEl.classList.add('hidden');
+                    btnEl.className = 'tab-btn px-4 py-3.5 rounded-xl font-bold text-sm border transition-all text-left sm:text-center bg-white text-slate-600 border-slate-200 hover:border-emerald-400';
+                }
+            }
+
+            // 탭 전환 직후 브라우저 레이아웃이 잡힌 뒤 캔버스 강제 리렌더링
+            requestAnimationFrame(() => {
+                if (tabIndex === 2) {
+                    drawDiurnalChart();
+                    drawVpdDistChart();
+                } else if (tabIndex === 3) {
+                    drawPsoConvergenceChart(latestPsoHistory);
+                }
+            });
+        }
+
+        function selectRegion(region) {
+            const regions = ['korea', 'japan', 'china'];
+            regions.forEach(r => {
+                const card = document.getElementById(`region-card-${r}`);
+                if (!card) return;
+                if (r === region) {
+                    card.classList.remove('border', 'border-slate-200');
+                    card.classList.add('border-2', r === 'korea' ? 'border-emerald-500' : (r === 'japan' ? 'border-sky-500' : 'border-amber-500'), 'shadow-sm');
+                } else {
+                    card.classList.remove('border-2', 'border-emerald-500', 'border-sky-500', 'border-amber-500', 'shadow-sm');
+                    card.classList.add('border', 'border-slate-200');
+                }
+            });
+        }
+
+        // =========================================================================
+        // 3. 고해상도(Retina/HiDPI) Canvas 준비 헬퍼
+        // =========================================================================
+        function setupHiDPICanvas(canvas, fallbackHeight) {
+            const dpr = Math.max(window.devicePixelRatio || 1, 2);
+            const rect = canvas.getBoundingClientRect();
+            const cssWidth = rect.width > 0 ? rect.width : (canvas.parentElement ? canvas.parentElement.clientWidth : 600);
+            const cssHeight = rect.height > 0 ? rect.height : fallbackHeight;
+
+            canvas.width = Math.floor(cssWidth * dpr);
+            canvas.height = Math.floor(cssHeight * dpr);
+
+            const ctx = canvas.getContext('2d');
+            ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+            return { ctx, width: cssWidth, height: cssHeight };
+        }
+
+        // =========================================================================
+        // 4. 온실 물리 반응 모델 & PSO 알고리즘 (30 Particles × 40 Iterations)
+        // =========================================================================
+        function calcVPD(tempC, rh) {
+            const es = 0.61078 * Math.exp((17.27 * tempC) / (tempC + 237.3));
+            const ea = es * (rh / 100.0);
+            return Math.max(0.01, es - ea);
+        }
+
+        // 제어 변수(관수량 irr: 0~60 mL/주, 환기시간 vent: 0~60 분/시간) 적용 후 온실 상태 예측
+        function predictGreenhouseState(inputs, irr, vent) {
+            const ventRatio = vent / 60.0;
+            const irrRatio = irr / 60.0;
+            const isNightOrDawn = inputs.solar < 80;
+
+            // 외기 추정 (새벽 vs 주간)
+            let outTemp = isNightOrDawn ? inputs.temp - 1.8 : inputs.temp - 5.5;
+            let outHumid = isNightOrDawn ? 72.0 : 52.0;
+
+            // 환기(냉각·제습)와 관수(증산 냉각·가습) 반영
+            const predTemp = inputs.temp + (outTemp - inputs.temp) * (0.45 * ventRatio) - (1.4 * irrRatio * (inputs.solar / 800));
+            const humidDrop = (inputs.humid - outHumid) * (0.55 * ventRatio);
+            const humidGain = 8.0 * irrRatio * (1 - 0.3 * ventRatio);
+            const predHumid = Math.min(98, Math.max(35, inputs.humid - humidDrop + humidGain));
+
+            // 근권 지습 변화 (일사 증산 소모 vs 점적 관수 보충)
+            const evapLoss = 2.0 + (inputs.solar / 900) * 10.0;
+            const soilGain = irrRatio * 24.0;
+            const predSoil = Math.min(85, Math.max(15, inputs.soil - evapLoss + soilGain));
+
+            const predVPD = calcVPD(predTemp, predHumid);
+            return { predTemp, predHumid, predSoil, predVPD };
+        }
+
+        // 목적함수 (Loss): 농진청 VPD 기준 + 스마트팜코리아 시간대별 온도·습도 + 근권 지습 오차
+        function computeLoss(inputs, irr, vent) {
+            const isNightOrDawn = inputs.solar < 80;
+            const targetVPD = isNightOrDawn ? 0.62 : 0.88;     // 농진청 적정 VPD (주간 개화기 0.85~0.90, 새벽 0.60 이상)
+            const targetTemp = isNightOrDawn ? 12.5 : 24.5;    // 스마트팜코리아 야간 11~15°C / 주간 23~26°C
+            const targetHumid = isNightOrDawn ? 82.0 : 65.0;   // 야간 90% 이하 / 주간 60~70%
+            const targetSoil = 55.0;
+
+            const pred = predictGreenhouseState(inputs, irr, vent);
+
+            // 1) VPD 오차 (핵심 목적항)
+            let vpdLoss = Math.abs(pred.predVPD - targetVPD) * 1.8;
+            if (pred.predVPD < 0.50) {
+                vpdLoss += Math.pow(0.50 - pred.predVPD, 2) * 12.0; // 결로 과습 페널티
+            } else if (pred.predVPD > 1.20) {
+                vpdLoss += Math.pow(pred.predVPD - 1.20, 2) * 10.0; // 고온 건조 페널티
+            }
+
+            // 2) 온도·습도·지습 오차
+            const tempLoss = Math.abs(pred.predTemp - targetTemp) * 0.045;
+            const humidLoss = Math.abs(pred.predHumid - targetHumid) * 0.015;
+            const soilLoss = Math.abs(pred.predSoil - targetSoil) * 0.025;
+
+            // 3) 자원 절약 규제항
+            const energyPenalty = (irr / 60.0) * 0.03 + (vent / 60.0) * 0.03;
+
+            return vpdLoss + tempLoss + humidLoss + soilLoss + energyPenalty;
+        }
+
+        // 결정론적 의사난수 (동일 슬라이더 조건에서도 자연스러운 입자 분포 보장)
+        function seededRng(seed) {
+            let s = Math.floor(Math.abs(seed) * 9973) % 2147483647;
+            if (s <= 0) s += 2147483646;
+            return function() {
+                s = (s * 16807) % 2147483647;
+                return (s - 1) / 2147483646;
+            };
+        }
+
+        function executePSO(isManualClick = false) {
+            const inputs = {
+                temp: parseFloat(document.getElementById('input-temp').value),
+                humid: parseFloat(document.getElementById('input-humid').value),
+                solar: parseFloat(document.getElementById('input-solar').value),
+                soil: parseFloat(document.getElementById('input-soil').value)
+            };
+
+            // 시간대 모드 배지 갱신
+            const modeBadge = document.getElementById('mode-indicator');
+            if (inputs.solar < 80) {
+                modeBadge.textContent = '야간·새벽 과습방지 모드';
+                modeBadge.className = 'text-[11px] font-bold px-2.5 py-1 rounded-full bg-sky-100 text-sky-800';
+            } else {
+                modeBadge.textContent = '주간 광합성·증산 제어 모드';
+                modeBadge.className = 'text-[11px] font-bold px-2.5 py-1 rounded-full bg-emerald-100 text-emerald-800';
+            }
+
+            const numParticles = 30;
+            const maxIter = 40;
+            const irrMin = 5, irrMax = 60;
+            const ventMin = 0, ventMax = 60;
+
+            // 속도 제한(Vmax)을 설정해 40세대에 걸쳐 단계적으로 오차가 수렴하도록 구성
+            const vIrrMax = (irrMax - irrMin) * 0.12;
+            const vVentMax = (ventMax - ventMin) * 0.12;
+
+            const seedVal = inputs.temp * 17.3 + inputs.humid * 5.1 + inputs.solar * 0.23 + inputs.soil * 3.7 + (isManualClick ? Math.random() * 50 : 7);
+            const rand = seededRng(seedVal);
+
+            let particles = [];
+            let gBestIrr = 25;
+            let gBestVent = 30;
+            let gBestLoss = Infinity;
+
+            // 입자 초기화
+            for (let i = 0; i < numParticles; i++) {
+                const irr = irrMin + rand() * (irrMax - irrMin);
+                const vent = ventMin + rand() * (ventMax - ventMin);
+                const vIrr = (rand() - 0.5) * vIrrMax;
+                const vVent = (rand() - 0.5) * vVentMax;
+                const loss = computeLoss(inputs, irr, vent);
+
+                particles.push({
+                    irr, vent, vIrr, vVent,
+                    pBestIrr: irr, pBestVent: vent, pBestLoss: loss
+                });
+
+                if (loss < gBestLoss) {
+                    gBestLoss = loss;
+                    gBestIrr = irr;
+                    gBestVent = vent;
+                }
+            }
+
+            const history = [];
+
+            // 40세대 탐색 루프
+            for (let iter = 0; iter < maxIter; iter++) {
+                const w = 0.90 - 0.50 * (iter / (maxIter - 1)); // 관성 가중치 감쇠
+                const c1 = 1.60;
+                const c2 = 1.65;
+
+                for (let i = 0; i < numParticles; i++) {
+                    const p = particles[i];
+                    const r1 = rand();
+                    const r2 = rand();
+
+                    p.vIrr = w * p.vIrr + c1 * r1 * (p.pBestIrr - p.irr) + c2 * r2 * (gBestIrr - p.irr);
+                    p.vVent = w * p.vVent + c1 * r1 * (p.pBestVent - p.vent) + c2 * r2 * (gBestVent - p.vent);
+
+                    p.vIrr = Math.max(-vIrrMax, Math.min(vIrrMax, p.vIrr));
+                    p.vVent = Math.max(-vVentMax, Math.min(vVentMax, p.vVent));
+
+                    p.irr = Math.max(irrMin, Math.min(irrMax, p.irr + p.vIrr));
+                    p.vent = Math.max(ventMin, Math.min(ventMax, p.vent + p.vVent));
+
+                    const loss = computeLoss(inputs, p.irr, p.vent);
+                    if (loss < p.pBestLoss) {
+                        p.pBestLoss = loss;
+                        p.pBestIrr = p.irr;
+                        p.pBestVent = p.vent;
+                    }
+                    if (loss < gBestLoss) {
+                        gBestLoss = loss;
+                        gBestIrr = p.irr;
+                        gBestVent = p.vent;
+                    }
+                }
+
+                history.push(Number(gBestLoss.toFixed(4)));
+            }
+
+            latestPsoHistory = history;
+
+            // UI 수치 업데이트
+            const optIrr = Math.round(gBestIrr);
+            const optVent = Math.round(gBestVent);
+            const beforeVPD = calcVPD(inputs.temp, inputs.humid);
+            const afterPred = predictGreenhouseState(inputs, optIrr, optVent);
+
+            document.getElementById('res-irrigation').textContent = optIrr;
+            document.getElementById('res-ventilation').textContent = optVent;
+            document.getElementById('res-vpd-before').textContent = beforeVPD.toFixed(2);
+            document.getElementById('res-vpd-after').textContent = afterPred.predVPD.toFixed(2);
+            document.getElementById('final-loss-text').textContent = history[history.length - 1].toFixed(4);
+
+            const statusEl = document.getElementById('res-vpd-status');
+            if (afterPred.predVPD >= 0.80 && afterPred.predVPD <= 1.05) {
+                statusEl.textContent = '토마토 최적 구간(0.8~1.0) 도달';
+                statusEl.className = 'text-[11px] font-bold text-indigo-700';
+            } else if (afterPred.predVPD >= 0.50 && afterPred.predVPD <= 1.20) {
+                statusEl.textContent = `농진청 적정 구간(0.5~1.2) 안정 진입`;
+                statusEl.className = 'text-[11px] font-bold text-emerald-700';
+            } else {
+                statusEl.textContent = `극한 기후 보정 (${afterPred.predTemp.toFixed(1)}°C / ${Math.round(afterPred.predHumid)}%)`;
+                statusEl.className = 'text-[11px] font-bold text-amber-700';
+            }
+
+            // 수렴 곡선 즉시 그리기
+            drawPsoConvergenceChart(history);
+        }
+
+        // =========================================================================
+        // 5. 순수 HTML5 Canvas 차트 1: PSO 목적함수 수렴 곡선 (100% 오프라인·모바일 보장)
+        // =========================================================================
+        function drawPsoConvergenceChart(data) {
+            const canvas = document.getElementById('psoCanvas');
+            if (!canvas || !data || data.length === 0) return;
+
+            const { ctx, width, height } = setupHiDPICanvas(canvas, 235);
+            ctx.clearRect(0, 0, width, height);
+
+            const pad = { top: 20, right: 20, bottom: 32, left: 52 };
+            const plotW = width - pad.left - pad.right;
+            const plotH = height - pad.top - pad.bottom;
+
+            const rawMin = Math.min(...data);
+            const rawMax = Math.max(...data);
+            const spread = Math.max(0.015, rawMax - rawMin);
+            const yMin = Math.max(0, rawMin - spread * 0.15);
+            const yMax = rawMax + spread * 0.15;
+            const yRange = Math.max(0.001, yMax - yMin);
+
+            // 배경 그리드 및 Y축 눈금 (5단계)
+            ctx.font = '600 11px Inter, sans-serif';
+            ctx.textAlign = 'right';
+            ctx.textBaseline = 'middle';
+
+            const ySteps = 4;
+            for (let i = 0; i <= ySteps; i++) {
+                const ratio = i / ySteps;
+                const val = yMax - ratio * yRange;
+                const y = pad.top + ratio * plotH;
+
+                ctx.strokeStyle = '#e2e8f0';
+                ctx.lineWidth = 1;
+                ctx.beginPath();
+                ctx.moveTo(pad.left, y);
+                ctx.lineTo(pad.left + plotW, y);
+                ctx.stroke();
+
+                ctx.fillStyle = '#64748b';
+                ctx.fillText(val.toFixed(3), pad.left - 8, y);
+            }
+
+            // X축 눈금 (1세대, 6세대, 11세대 ... 36세대, 40세대)
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'top';
+            const xLabels = [0, 4, 9, 14, 19, 24, 29, 34, 39];
+            xLabels.forEach(idx => {
+                if (idx >= data.length) return;
+                const x = pad.left + (idx / (data.length - 1)) * plotW;
+                ctx.fillStyle = '#64748b';
+                ctx.fillText(`${idx + 1}세대`, x, pad.top + plotH + 9);
+            });
+
+            // 좌표 계산
+            psoChartPoints = data.map((val, idx) => {
+                const x = pad.left + (idx / (data.length - 1)) * plotW;
+                const y = pad.top + ((yMax - val) / yRange) * plotH;
+                return { x, y, gen: idx + 1, loss: val };
+            });
+
+            // 면적 그라데이션 채우기
+            const grad = ctx.createLinearGradient(0, pad.top, 0, pad.top + plotH);
+            grad.addColorStop(0, 'rgba(5, 150, 105, 0.24)');
+            grad.addColorStop(1, 'rgba(5, 150, 105, 0.02)');
+
+            ctx.beginPath();
+            ctx.moveTo(psoChartPoints[0].x, pad.top + plotH);
+            psoChartPoints.forEach(pt => ctx.lineTo(pt.x, pt.y));
+            ctx.lineTo(psoChartPoints[psoChartPoints.length - 1].x, pad.top + plotH);
+            ctx.closePath();
+            ctx.fillStyle = grad;
+            ctx.fill();
+
+            // 에메랄드 그린 수렴 곡선 선 그리기
+            ctx.beginPath();
+            ctx.strokeStyle = '#059669';
+            ctx.lineWidth = 2.6;
+            ctx.lineJoin = 'round';
+            psoChartPoints.forEach((pt, i) => {
+                if (i === 0) ctx.moveTo(pt.x, pt.y);
+                else ctx.lineTo(pt.x, pt.y);
+            });
+            ctx.stroke();
+
+            // 각 세대 포인트 마커
+            psoChartPoints.forEach((pt, idx) => {
+                ctx.beginPath();
+                ctx.arc(pt.x, pt.y, idx === psoChartPoints.length - 1 ? 4.5 : 2.6, 0, Math.PI * 2);
+                ctx.fillStyle = idx === psoChartPoints.length - 1 ? '#047857' : '#10b981';
+                ctx.fill();
+                ctx.strokeStyle = '#ffffff';
+                ctx.lineWidth = 1.2;
+                ctx.stroke();
+            });
+        }
+
+        // PSO 차트 마우스/터치 툴팁 인터랙션
+        function bindPsoTooltip() {
+            const container = document.getElementById('pso-canvas-container');
+            const tooltip = document.getElementById('pso-tooltip');
+            if (!container || !tooltip) return;
+
+            const handleMove = (clientX) => {
+                if (!psoChartPoints.length) return;
+                const rect = container.getBoundingClientRect();
+                const relX = clientX - rect.left;
+
+                let closest = psoChartPoints[0];
+                let minDist = Infinity;
+                psoChartPoints.forEach(pt => {
+                    const d = Math.abs(pt.x - relX);
+                    if (d < minDist) {
+                        minDist = d;
+                        closest = pt;
+                    }
+                });
+
+                tooltip.textContent = `${closest.gen}세대 · 손실 오차: ${closest.loss.toFixed(4)}`;
+                tooltip.classList.remove('hidden');
+                const leftPos = Math.min(rect.width - 155, Math.max(8, closest.x - 65));
+                const topPos = Math.max(8, closest.y - 34);
+                tooltip.style.left = `${leftPos}px`;
+                tooltip.style.top = `${topPos}px`;
+            };
+
+            container.addEventListener('mousemove', e => handleMove(e.clientX));
+            container.addEventListener('touchstart', e => {
+                if (e.touches[0]) handleMove(e.touches[0].clientX);
+            }, { passive: true });
+            container.addEventListener('mouseleave', () => tooltip.classList.add('hidden'));
+        }
+
+        // =========================================================================
+        // 6. 순수 HTML5 Canvas 차트 2 & 3 (탭 2 한국 Cfa 실측 시각화)
+        // =========================================================================
+        function drawDiurnalChart() {
+            const canvas = document.getElementById('diurnalCanvas');
+            if (!canvas) return;
+            const { ctx, width, height } = setupHiDPICanvas(canvas, 270);
+            ctx.clearRect(0, 0, width, height);
+
+            const avgTemp = [13.5, 13.3, 13.1, 13.0, 13.2, 13.4, 14.2, 16.5, 19.8, 22.6, 24.8, 26.5, 27.8, 28.2, 27.6, 26.1, 23.8, 20.5, 18.1, 16.6, 15.5, 14.8, 14.2, 13.8];
+            const avgHumid = [94.5, 95.2, 95.5, 95.8, 95.3, 94.6, 91.8, 84.5, 75.2, 68.4, 63.5, 60.2, 58.5, 57.8, 59.4, 62.8, 68.5, 76.4, 83.2, 87.5, 90.2, 91.8, 93.1, 93.9];
+            const avgVPD = [0.08, 0.07, 0.07, 0.06, 0.07, 0.08, 0.13, 0.29, 0.57, 0.86, 1.14, 1.38, 1.55, 1.61, 1.50, 1.26, 0.93, 0.57, 0.35, 0.24, 0.17, 0.14, 0.11, 0.09];
+
+            const pad = { top: 34, right: 44, bottom: 28, left: 42 };
+            const plotW = width - pad.left - pad.right;
+            const plotH = height - pad.top - pad.bottom;
+
+            // 범례 상단
+            ctx.font = '700 11px Noto Sans KR, sans-serif';
+            ctx.textAlign = 'left';
+            ctx.fillStyle = '#0284c7'; ctx.fillRect(pad.left, 10, 10, 10);
+            ctx.fillStyle = '#334155'; ctx.fillText('내부습도(%)', pad.left + 14, 19);
+
+            ctx.fillStyle = '#e11d48'; ctx.fillRect(pad.left + 95, 10, 10, 10);
+            ctx.fillStyle = '#334155'; ctx.fillText('내부온도(°C)', pad.left + 109, 19);
+
+            ctx.fillStyle = '#059669'; ctx.fillRect(pad.left + 195, 10, 10, 10);
+            ctx.fillStyle = '#334155'; ctx.fillText('내부VPD(kPa)', pad.left + 209, 19);
+
+            // 그리드 & 좌·우 Y축
+            ctx.font = '500 10px Inter, sans-serif';
+            for (let i = 0; i <= 4; i++) {
+                const y = pad.top + (i / 4) * plotH;
+                ctx.strokeStyle = '#e2e8f0';
+                ctx.beginPath(); ctx.moveTo(pad.left, y); ctx.lineTo(pad.left + plotW, y); ctx.stroke();
+
+                ctx.textAlign = 'right';
+                ctx.fillStyle = '#64748b';
+                ctx.fillText(`${100 - i * 25}`, pad.left - 6, y + 3);
+
+                ctx.textAlign = 'left';
+                ctx.fillStyle = '#059669';
+                ctx.fillText(`${(2.0 - i * 0.5).toFixed(1)}`, pad.left + plotW + 6, y + 3);
+            }
+
+            // X축 시간 라벨
+            ctx.textAlign = 'center';
+            ctx.fillStyle = '#64748b';
+            [0, 4, 8, 12, 16, 20, 23].forEach(h => {
+                const x = pad.left + (h / 23) * plotW;
+                ctx.fillText(`${String(h).padStart(2, '0')}시`, x, pad.top + plotH + 15);
+            });
+
+            const drawSeries = (arr, maxVal, color, lineW) => {
+                ctx.beginPath();
+                ctx.strokeStyle = color;
+                ctx.lineWidth = lineW;
+                arr.forEach((v, idx) => {
+                    const x = pad.left + (idx / 23) * plotW;
+                    const y = pad.top + ((maxVal - v) / maxVal) * plotH;
+                    if (idx === 0) ctx.moveTo(x, y);
+                    else ctx.lineTo(x, y);
+                });
+                ctx.stroke();
+            };
+
+            drawSeries(avgHumid, 100, '#0284c7', 2);
+            drawSeries(avgTemp, 100, '#e11d48', 2);
+            drawSeries(avgVPD, 2.0, '#059669', 2.8);
+        }
+
+        function drawVpdDistChart() {
+            const canvas = document.getElementById('vpdDistCanvas');
+            if (!canvas) return;
+            const { ctx, width, height } = setupHiDPICanvas(canvas, 270);
+            ctx.clearRect(0, 0, width, height);
+
+            const bars = [
+                { label: '극심과습\n(<0.3)', pct: 31.4, color: '#0284c7' },
+                { label: '주의과습\n(0.3~0.5)', pct: 15.4, color: '#38bdf8' },
+                { label: '적정하단\n(0.5~0.8)', pct: 15.7, color: '#10b981' },
+                { label: '개화최적\n(0.8~1.0)', pct: 12.7, color: '#059669' },
+                { label: '적정상단\n(1.0~1.2)', pct: 10.0, color: '#34d399' },
+                { label: '고온건조\n(>1.2)', pct: 14.8, color: '#f43f5e' }
+            ];
+
+            const pad = { top: 24, right: 16, bottom: 38, left: 38 };
+            const plotW = width - pad.left - pad.right;
+            const plotH = height - pad.top - pad.bottom;
+            const maxPct = 35;
+
+            ctx.font = '500 10px Inter, sans-serif';
+            ctx.textAlign = 'right';
+            for (let i = 0; i <= 5; i++) {
+                const val = maxPct - i * 7;
+                const y = pad.top + (i / 5) * plotH;
+                ctx.strokeStyle = '#e2e8f0';
+                ctx.beginPath(); ctx.moveTo(pad.left, y); ctx.lineTo(pad.left + plotW, y); ctx.stroke();
+                ctx.fillStyle = '#64748b';
+                ctx.fillText(`${val}%`, pad.left - 6, y + 3);
+            }
+
+            const slotW = plotW / bars.length;
+            const barW = Math.min(38, slotW * 0.62);
+
+            bars.forEach((b, idx) => {
+                const cx = pad.left + slotW * idx + slotW / 2;
+                const barH = (b.pct / maxPct) * plotH;
+                const y = pad.top + plotH - barH;
+
+                ctx.fillStyle = b.color;
+                ctx.beginPath();
+                ctx.roundRect(cx - barW / 2, y, barW, barH, [6, 6, 0, 0]);
+                ctx.fill();
+
+                ctx.fillStyle = '#1e293b';
+                ctx.font = '700 10.5px Inter, sans-serif';
+                ctx.textAlign = 'center';
+                ctx.fillText(`${b.pct}%`, cx, y - 6);
+
+                const lines = b.label.split('\n');
+                ctx.fillStyle = '#475569';
+                ctx.font = '600 9.5px Noto Sans KR, sans-serif';
+                ctx.fillText(lines[0], cx, pad.top + plotH + 13);
+                ctx.fillText(lines[1], cx, pad.top + plotH + 25);
+            });
+        }
+
+        // =========================================================================
+        // 7. 슬라이더 & 프리셋 핸들러 + 초기화 보장
+        // =========================================================================
+        function onSliderChange() {
+            const temp = parseFloat(document.getElementById('input-temp').value);
+            const humid = parseInt(document.getElementById('input-humid').value, 10);
+            const solar = parseInt(document.getElementById('input-solar').value, 10);
+            const soil = parseInt(document.getElementById('input-soil').value, 10);
+
+            document.getElementById('val-temp').textContent = `${temp.toFixed(1)} °C`;
+            document.getElementById('val-humid').textContent = `${humid} %`;
+            document.getElementById('val-solar').textContent = `${solar} W/m²`;
+            document.getElementById('val-soil').textContent = `${soil} %`;
+
+            executePSO(false);
+        }
+
+        function applyPreset(type) {
+            if (type === 'dawn') {
+                document.getElementById('input-temp').value = 13.5;
+                document.getElementById('input-humid').value = 95;
+                document.getElementById('input-solar').value = 15;
+                document.getElementById('input-soil').value = 48;
+            } else if (type === 'noon') {
+                document.getElementById('input-temp').value = 34.5;
+                document.getElementById('input-humid').value = 52;
+                document.getElementById('input-solar').value = 780;
+                document.getElementById('input-soil').value = 24;
+            }
+            onSliderChange();
+        }
+
+        function initApp() {
+            bindPsoTooltip();
+            onSliderChange();
+        }
+
+        window.addEventListener('DOMContentLoaded', initApp);
+        window.addEventListener('load', () => {
+            if (!latestPsoHistory.length) initApp();
+            else drawPsoConvergenceChart(latestPsoHistory);
+        });
+        window.addEventListener('resize', () => {
+            if (currentTab === 2) {
+                drawDiurnalChart();
+                drawVpdDistChart();
+            } else if (currentTab === 3) {
+                drawPsoConvergenceChart(latestPsoHistory);
+            }
+        });
+    </script>
+</body>
+</html>
