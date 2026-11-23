@@ -1,0 +1,1085 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>동아시아 Cfa 기후권 토마토 스마트팜 AI 환경 최적화 대시보드</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Chart.js CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- Leaflet CSS & JS CDN (동아시아 Cfa 지도) -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <!-- Google Fonts: Inter & Noto Sans KR -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Noto+Sans+KR:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', 'Noto Sans KR', sans-serif;
+            background-color: #f8fafc;
+            color: #1e293b;
+        }
+        /* 커스텀 레인지 슬라이더 스타일링 */
+        input[type="range"] {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 100%;
+            height: 8px;
+            background: #e2e8f0;
+            border-radius: 9999px;
+            outline: none;
+        }
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: #059669;
+            cursor: pointer;
+            border: 3px solid #ffffff;
+            box-shadow: 0 2px 6px rgba(5, 150, 105, 0.4);
+            transition: transform 0.15s ease;
+        }
+        input[type="range"]::-webkit-slider-thumb:hover {
+            transform: scale(1.15);
+        }
+        #cfa-map {
+            height: 420px;
+            width: 100%;
+            border-radius: 0.75rem;
+            z-index: 1;
+        }
+    </style>
+</head>
+<body class="min-h-screen pb-12">
+
+    <!-- 상단 헤더 바 -->
+    <header class="bg-white border-b border-slate-200 sticky top-0 z-30 shadow-sm">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-xl bg-emerald-600 flex items-center justify-center text-white font-bold text-lg shadow-sm">
+                    AI
+                </div>
+                <div>
+                    <div class="flex items-center gap-2">
+                        <h1 class="text-lg sm:text-xl font-bold text-slate-900 tracking-tight">동아시아 Cfa 기후권 토마토 스마트팜 AI 최적화 플랫폼</h1>
+                        <span class="hidden md:inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200">
+                            PSO v2.4
+                        </span>
+                    </div>
+                    <p class="text-xs text-slate-500 mt-0.5">전남 화순 실측(3,457h) 기반 환경 반응 모델 & 농진청·스마트팜코리아 생육 기준 적용</p>
+                </div>
+            </div>
+            <div class="flex items-center gap-2 text-xs font-medium text-slate-600 bg-slate-100 px-3 py-1.5 rounded-lg self-start sm:self-auto">
+                <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+                <span>대상 작목: 시설 토마토 (수경재배)</span>
+            </div>
+        </div>
+    </header>
+
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-6 space-y-6">
+
+        <!-- 상단 4개 핵심 지표(KPI) 카드 -->
+        <section class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            <!-- KPI 1 -->
+            <div class="bg-white rounded-2xl p-5 border border-slate-200 shadow-sm hover:border-emerald-300 transition">
+                <div class="flex items-center justify-between">
+                    <span class="text-xs font-semibold uppercase tracking-wider text-slate-400">전처리 완료 실측 데이터</span>
+                    <span class="p-1.5 rounded-lg bg-emerald-50 text-emerald-600">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                    </span>
+                </div>
+                <div class="mt-2 flex items-baseline gap-1.5">
+                    <span class="text-2xl sm:text-3xl font-extrabold text-slate-900">3,457</span>
+                    <span class="text-sm font-bold text-emerald-600">시간</span>
+                </div>
+                <p class="mt-1.5 text-xs font-medium text-slate-500">전남 실측 + 전북·부산 Cfa 권역 연계</p>
+            </div>
+
+            <!-- KPI 2 -->
+            <div class="bg-white rounded-2xl p-5 border border-slate-200 shadow-sm hover:border-emerald-300 transition">
+                <div class="flex items-center justify-between">
+                    <span class="text-xs font-semibold uppercase tracking-wider text-slate-400">평균 / 최고 내부온도</span>
+                    <span class="p-1.5 rounded-lg bg-rose-50 text-rose-600">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+                    </span>
+                </div>
+                <div class="mt-2 flex items-baseline gap-1">
+                    <span class="text-2xl sm:text-3xl font-extrabold text-rose-600">19.74°C</span>
+                    <span class="text-base font-bold text-slate-400">/ 45.0°C</span>
+                </div>
+                <p class="mt-1.5 text-xs font-medium text-slate-500">동아시아 Cfa 고온기 환기 최적화 필수</p>
+            </div>
+
+            <!-- KPI 3 -->
+            <div class="bg-white rounded-2xl p-5 border border-slate-200 shadow-sm hover:border-emerald-300 transition">
+                <div class="flex items-center justify-between">
+                    <span class="text-xs font-semibold uppercase tracking-wider text-slate-400">평균 습도 / 평균 VPD</span>
+                    <span class="p-1.5 rounded-lg bg-sky-50 text-sky-600">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 15a4 4 0 004 4h9a5 5 0 10-.1-9.999 5.002 5.002 0 10-9.78 2.096A4.001 4.001 0 003 15z"/></svg>
+                    </span>
+                </div>
+                <div class="mt-2 flex items-baseline gap-1">
+                    <span class="text-2xl sm:text-3xl font-extrabold text-sky-600">77.3%</span>
+                    <span class="text-base font-bold text-slate-400">/ 0.71 kPa</span>
+                </div>
+                <p class="mt-1.5 text-xs font-medium text-slate-500">새벽 시간대(0~6시) 91% 이상 과습</p>
+            </div>
+
+            <!-- KPI 4 -->
+            <div class="bg-white rounded-2xl p-5 border border-slate-200 shadow-sm hover:border-emerald-300 transition">
+                <div class="flex items-center justify-between">
+                    <span class="text-xs font-semibold uppercase tracking-wider text-slate-400">기후 상동성 확장 권역</span>
+                    <span class="p-1.5 rounded-lg bg-emerald-50 text-emerald-600">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                    </span>
+                </div>
+                <div class="mt-2 flex items-baseline gap-1.5">
+                    <span class="text-2xl sm:text-3xl font-extrabold text-slate-900">한·일·중</span>
+                    <span class="text-sm font-bold text-emerald-600">3개국</span>
+                </div>
+                <p class="mt-1.5 text-xs font-medium text-slate-500">일본 규슈·혼슈 남부 및 중국 남동부 적용</p>
+            </div>
+        </section>
+
+        <!-- 네비게이션 탭 (반드시 3개 탭만 구성 - 4번 탭 완전 삭제) -->
+        <nav class="grid grid-cols-1 md:grid-cols-3 gap-3">
+            <button id="tab-btn-1" onclick="switchTab(1)" class="tab-btn px-4 py-3.5 rounded-xl font-bold text-sm border transition-all text-left sm:text-center bg-white text-slate-600 border-slate-200 hover:border-emerald-400">
+                1. 동아시아 Cfa 기후 지도 & 전략 적용 권역
+            </button>
+            <button id="tab-btn-2" onclick="switchTab(2)" class="tab-btn px-4 py-3.5 rounded-xl font-bold text-sm border transition-all text-left sm:text-center bg-white text-slate-600 border-slate-200 hover:border-emerald-400">
+                2. 한국 Cfa권 실측 데이터 시각화 분석
+            </button>
+            <button id="tab-btn-3" onclick="switchTab(3)" class="tab-btn px-4 py-3.5 rounded-xl font-bold text-sm border transition-all text-left sm:text-center bg-emerald-600 text-white border-emerald-600 shadow-md">
+                3. 일본 농가 맞춤형 PSO 운영전략 시뮬레이터
+            </button>
+        </nav>
+
+        <!-- ===================================================================== -->
+        <!-- TAB 1: 동아시아 Cfa 기후 지도 & 전략 적용 권역 -->
+        <!-- ===================================================================== -->
+        <section id="tab-content-1" class="hidden space-y-6">
+            <div class="bg-white rounded-2xl p-6 border border-slate-200 shadow-sm">
+                <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-5">
+                    <div>
+                        <span class="inline-block px-3 py-1 rounded-full text-xs font-bold bg-emerald-50 text-emerald-700 border border-emerald-200 mb-2">
+                            쾨펜 기후 구분: 온난습윤기후 (Cfa) 상동성 매핑
+                        </span>
+                        <h2 class="text-xl font-bold text-slate-900">동아시아 Cfa 기후권 스마트팜 모델 확장 네트워크</h2>
+                        <p class="text-sm text-slate-500 mt-1">한국 전남(화순군) 실측 데이터로 학습·검증된 온실 환경 반응 모델을 동일 기후대인 일본 규슈·혼슈 남부 및 중국 남동부에 전이 적용합니다.</p>
+                    </div>
+                    <div class="flex flex-wrap gap-2 text-xs">
+                        <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-emerald-50 text-emerald-800 font-semibold border border-emerald-200">
+                            <span class="w-2.5 h-2.5 rounded-full bg-emerald-600"></span> 한국 실측 거점 (전남 화순)
+                        </span>
+                        <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-sky-50 text-sky-800 font-semibold border border-sky-200">
+                            <span class="w-2.5 h-2.5 rounded-full bg-sky-500"></span> 일본 타겟 농가 (규슈 구마모토)
+                        </span>
+                        <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-amber-50 text-amber-800 font-semibold border border-amber-200">
+                            <span class="w-2.5 h-2.5 rounded-full bg-amber-500"></span> 확장 Cfa 권역 (혼슈 남부·중국 남동부)
+                        </span>
+                    </div>
+                </div>
+
+                <!-- 인터랙티브 Leaflet 지도 -->
+                <div id="cfa-map" class="border border-slate-200 shadow-inner"></div>
+
+                <!-- 권역별 기후 유사도 & 전략 비교 카드 3종 -->
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mt-6">
+                    <div class="p-5 rounded-xl bg-emerald-50/60 border border-emerald-200">
+                        <div class="flex items-center justify-between mb-2">
+                            <span class="text-xs font-bold text-emerald-700 uppercase">기준 학습 권역 (Source)</span>
+                            <span class="px-2 py-0.5 text-xs font-bold bg-emerald-600 text-white rounded-md">기준 100%</span>
+                        </div>
+                        <h3 class="text-base font-bold text-slate-900">한국 전남 화순·전북·부산 권역</h3>
+                        <p class="text-xs text-slate-600 mt-1.5 leading-relaxed">
+                            • <strong>실측 규모:</strong> 3,457시간 (단동 비닐온실, 토마토 수경)<br>
+                            • <strong>기후 특징:</strong> 겨울·새벽 고습 결로(91~96%) 및 여름 고온(최고 45°C) 공존<br>
+                            • <strong>역할:</strong> 환기·관수 시 온습도 및 VPD 변화율 추정 모델 구축
+                        </p>
+                    </div>
+
+                    <div class="p-5 rounded-xl bg-sky-50/60 border border-sky-200">
+                        <div class="flex items-center justify-between mb-2">
+                            <span class="text-xs font-bold text-sky-700 uppercase">1차 실증 타겟 (Target A)</span>
+                            <span class="px-2 py-0.5 text-xs font-bold bg-sky-600 text-white rounded-md">기후 유사도 94.2%</span>
+                        </div>
+                        <h3 class="text-base font-bold text-slate-900">일본 규슈(구마모토·후쿠오카) 및 혼슈 남부</h3>
+                        <p class="text-xs text-slate-600 mt-1.5 leading-relaxed">
+                            • <strong>타겟 농가:</strong> 구마모토 사토 켄지 농장 (시설 토마토)<br>
+                            • <strong>기후 특징:</strong> 분지·해안형 Cfa 기후로 새벽 복사냉각 과습 및 주간 강한 일사 발생<br>
+                            • <strong>핵심 전략:</strong> 새벽 제습 환기 및 개화기 VPD 0.8~1.0 kPa 정밀 유지
+                        </p>
+                    </div>
+
+                    <div class="p-5 rounded-xl bg-amber-50/60 border border-amber-200">
+                        <div class="flex items-center justify-between mb-2">
+                            <span class="text-xs font-bold text-amber-700 uppercase">2차 확장 권역 (Target B)</span>
+                            <span class="px-2 py-0.5 text-xs font-bold bg-amber-600 text-white rounded-md">기후 유사도 89.5%</span>
+                        </div>
+                        <h3 class="text-base font-bold text-slate-900">중국 남동부 (저장성·푸젠성·장쑤성 남부)</h3>
+                        <p class="text-xs text-slate-600 mt-1.5 leading-relaxed">
+                            • <strong>기후 특징:</strong> 고온다습한 여름철 장기간 지속 및 봄·가을 높은 상대습도<br>
+                            • <strong>핵심 전략:</strong> 고온기 최대 환기 스케줄링 + 고 VPD(>1.5 kPa) 방지를 위한 점적 관수량 최적화
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ===================================================================== -->
+        <!-- TAB 2: 한국 Cfa권 실측 데이터 시각화 분석 -->
+        <!-- ===================================================================== -->
+        <section id="tab-content-2" class="hidden space-y-6">
+            <div class="bg-white rounded-2xl p-6 border border-slate-200 shadow-sm">
+                <div class="flex flex-col md:flex-row md:items-center justify-between gap-3 mb-6">
+                    <div>
+                        <span class="inline-block px-3 py-1 rounded-full text-xs font-bold bg-emerald-50 text-emerald-700 border border-emerald-200 mb-2">
+                            전라남도 화순군 실측 데이터 (3,457시간 전처리 완료)
+                        </span>
+                        <h2 class="text-xl font-bold text-slate-900">시설 토마토(베타티니 · 수경 · 단동 비닐온실) 환경 패턴 분석</h2>
+                        <p class="text-sm text-slate-500 mt-1">실측 데이터에서 도출된 시간대별 온·습도 및 VPD 일변화와 농촌진흥청 생육 적정 기준 대비 분포입니다.</p>
+                    </div>
+                    <div class="bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-xs text-slate-600 space-y-1">
+                        <div>• <strong>수집 거점:</strong> 전남 화순군 (재배면적 2,100㎡)</div>
+                        <div>• <strong>주요 병목:</strong> 새벽(0~6시) VPD 0.06~0.35 kPa 결로 위험</div>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    <!-- 차트 1: 시간대별 내부온도·습도·VPD 일변화 -->
+                    <div class="p-5 rounded-xl border border-slate-200 bg-slate-50/40">
+                        <div class="flex items-center justify-between mb-3">
+                            <h3 class="text-sm font-bold text-slate-800">1) 시간대별(0~23시) 내부온도 · 습도 · VPD 일변화 추이</h3>
+                            <span class="text-[11px] font-semibold px-2 py-0.5 rounded bg-rose-100 text-rose-700">새벽 과습 & 한낮 고온</span>
+                        </div>
+                        <div class="relative h-72 w-full">
+                            <canvas id="diurnalChart"></canvas>
+                        </div>
+                        <p class="mt-3 text-xs text-slate-500 leading-relaxed">
+                            ※ <strong>분석 결과:</strong> 00~06시 새벽 구간에서 내부온도가 13~14°C로 낮아지며 상대습도가 <strong>91~96%</strong>까지 상승, VPD가 <strong>0.06~0.35 kPa</strong>로 떨어져 잿빛곰팡이병 등 결로 병해 위험이 극대화됩니다.
+                        </p>
+                    </div>
+
+                    <!-- 차트 2: 농촌진흥청 VPD 적정 기준 대비 실측 분포 -->
+                    <div class="p-5 rounded-xl border border-slate-200 bg-slate-50/40">
+                        <div class="flex items-center justify-between mb-3">
+                            <h3 class="text-sm font-bold text-slate-800">2) 농촌진흥청 VPD 적정 기준(0.5~1.2 kPa) 대비 분포</h3>
+                            <span class="text-[11px] font-semibold px-2 py-0.5 rounded bg-emerald-100 text-emerald-700">적정 구간 38.4% 불과</span>
+                        </div>
+                        <div class="relative h-72 w-full">
+                            <canvas id="vpdDistChart"></canvas>
+                        </div>
+                        <p class="mt-3 text-xs text-slate-500 leading-relaxed">
+                            ※ <strong>분석 결과:</strong> 전체 3,457시간 중 <strong>46.8%가 과습 구간(&lt;0.5 kPa)</strong>, <strong>14.8%가 고온 건조 구간(&gt;1.2 kPa)</strong>에 해당하여 AI 기반 환기·관수 동시 최적화가 필수적입니다.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ===================================================================== -->
+        <!-- TAB 3: 일본 농가 맞춤형 PSO 운영전략 시뮬레이터 (기본 활성 탭) -->
+        <!-- ===================================================================== -->
+        <section id="tab-content-3" class="space-y-6">
+            <div class="bg-white rounded-2xl p-6 border border-slate-200 shadow-sm">
+                
+                <!-- 상단 헤더 & 프리셋 버튼 3개 -->
+                <div class="flex flex-col xl:flex-row xl:items-center justify-between gap-4 pb-5 border-b border-slate-100">
+                    <div>
+                        <span class="inline-block px-3 py-1 rounded-full text-xs font-bold bg-emerald-50 text-emerald-700 border border-emerald-200 mb-2">
+                            AI 알고리즘: 입자 군집 최적화 (Particle Swarm Optimization)
+                        </span>
+                        <h2 class="text-xl sm:text-2xl font-bold text-slate-900">일본 규슈(사토 켄지 농장) 맞춤형 최적 관수량 · 환기 시간 탐색기</h2>
+                        <p class="text-sm text-slate-500 mt-1">한국 전남 Cfa 실측 환경 반응 모델과 농진청·스마트팜코리아 목표 기준을 반영해 30개 입자가 40세대 탐색으로 최적 제어값을 도출합니다.</p>
+                    </div>
+
+                    <!-- 프리셋 버튼 3개 -->
+                    <div class="flex flex-wrap gap-2 shrink-0">
+                        <button onclick="applyPreset('dawn')" class="px-3.5 py-2 rounded-xl text-xs font-bold bg-sky-50 text-sky-700 border border-sky-200 hover:bg-sky-100 transition shadow-sm">
+                            프리셋: 구마모토 새벽 과습 (05시)
+                        </button>
+                        <button onclick="applyPreset('noon')" class="px-3.5 py-2 rounded-xl text-xs font-bold bg-rose-50 text-rose-700 border border-rose-200 hover:bg-rose-100 transition shadow-sm">
+                            프리셋: 규슈 여름 한낮 고온 (13시)
+                        </button>
+                        <button onclick="applyPreset('bloom')" class="px-3.5 py-2 rounded-xl text-xs font-bold bg-emerald-50 text-emerald-700 border border-emerald-200 hover:bg-emerald-100 transition shadow-sm">
+                            프리셋: 규슈 봄철 개화·착과기 (10시)
+                        </button>
+                    </div>
+                </div>
+
+                <!-- 적용된 공공 농업기술 목표 기준 패널 -->
+                <div class="mt-5 p-4 rounded-xl bg-slate-50 border border-slate-200 grid grid-cols-1 lg:grid-cols-2 gap-3 text-xs">
+                    <div class="flex items-start gap-2.5">
+                        <span class="px-2 py-0.5 rounded bg-emerald-600 text-white font-bold shrink-0 mt-0.5">출처 1</span>
+                        <div>
+                            <div class="font-bold text-slate-800">농촌진흥청 국립원예특작과학원 「수증기압포차(VPD) 농가활용프로그램」</div>
+                            <div class="text-slate-600 mt-0.5">일반 생육 적정 VPD: <strong class="text-emerald-700">0.5 ~ 1.2 kPa</strong> / 개화·착과기 권장 목표: <strong class="text-emerald-700">0.8 ~ 1.0 kPa</strong> (0.4 kPa 이하 결로·1.5 kPa 이상 기공폐쇄 페널티)</div>
+                        </div>
+                    </div>
+                    <div class="flex items-start gap-2.5">
+                        <span class="px-2 py-0.5 rounded bg-teal-600 text-white font-bold shrink-0 mt-0.5">출처 2</span>
+                        <div>
+                            <div class="font-bold text-slate-800">스마트팜코리아 「월별 토마토 재배가이드」</div>
+                            <div class="text-slate-600 mt-0.5">주간 적온 <strong class="text-teal-700">23~26°C (습도 60~70%)</strong> · 일몰 후 <strong class="text-teal-700">13~15°C</strong> · 심야 <strong class="text-teal-700">9~11°C (습도 80~90% 이내)</strong> · 적정 지온 17~20°C / 목표 지습 65%</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 메인 시뮬레이터 그리드 (좌측 입력 / 우측 결과 & 수렴 곡선) -->
+                <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 mt-6">
+                    
+                    <!-- 좌측 입력 패널 (5칸) -->
+                    <div class="lg:col-span-5 bg-slate-50/70 rounded-2xl p-5 border border-slate-200 flex flex-col justify-between space-y-5">
+                        <div class="space-y-4">
+                            <div class="flex items-center justify-between">
+                                <h3 class="text-base font-bold text-slate-900">현재 온실 환경 센서 입력</h3>
+                                <span id="active-target-badge" class="text-[11px] font-bold px-2.5 py-1 rounded-full bg-emerald-100 text-emerald-800">
+                                    목표 VPD: 0.90 kPa
+                                </span>
+                            </div>
+
+                            <!-- 생육·시간대 모드 선택 -->
+                            <div>
+                                <label class="block text-xs font-bold text-slate-700 mb-1.5">생육 · 시간대 목표 모드 (자동 기준 전환)</label>
+                                <select id="time-mode" onchange="handleModeChange()" class="w-full rounded-xl border border-slate-300 bg-white px-3.5 py-2.5 text-sm font-semibold text-slate-800 focus:outline-none focus:ring-2 focus:ring-emerald-500">
+                                    <option value="day" selected>주간 광합성기 (목표 24.5°C / 습도 65% / VPD 0.90 kPa)</option>
+                                    <option value="evening">일몰 후 전류기 (목표 14.0°C / 습도 78% / VPD 0.65 kPa)</option>
+                                    <option value="dawn">심야·새벽 과습방지기 (목표 11.5°C / 습도 85% / VPD 0.55 kPa)</option>
+                                </select>
+                            </div>
+
+                            <!-- 슬라이더 1: 내부 온도 -->
+                            <div>
+                                <div class="flex justify-between text-xs font-bold mb-1.5">
+                                    <span class="text-slate-700">내부 온도 (°C)</span>
+                                    <span id="val-temp" class="text-emerald-600 text-sm">27.5 °C</span>
+                                </div>
+                                <input type="range" id="input-temp" min="5" max="45" step="0.5" value="27.5" oninput="updateInputsAndRun()">
+                                <div class="flex justify-between text-[10px] text-slate-400 mt-1">
+                                    <span>5°C (한계저온)</span>
+                                    <span>25°C (생육적온)</span>
+                                    <span>45°C (Cfa 최고극값)</span>
+                                </div>
+                            </div>
+
+                            <!-- 슬라이더 2: 내부 상대습도 -->
+                            <div>
+                                <div class="flex justify-between text-xs font-bold mb-1.5">
+                                    <span class="text-slate-700">내부 상대습도 (%)</span>
+                                    <span id="val-humid" class="text-emerald-600 text-sm">78 %</span>
+                                </div>
+                                <input type="range" id="input-humid" min="30" max="100" step="1" value="78" oninput="updateInputsAndRun()">
+                                <div class="flex justify-between text-[10px] text-slate-400 mt-1">
+                                    <span>30% (건조)</span>
+                                    <span>65% (주간적정)</span>
+                                    <span>100% (새벽결로)</span>
+                                </div>
+                            </div>
+
+                            <!-- 슬라이더 3: 외부 일사량 -->
+                            <div>
+                                <div class="flex justify-between text-xs font-bold mb-1.5">
+                                    <span class="text-slate-700">외부 일사량 (W/m²)</span>
+                                    <span id="val-solar" class="text-emerald-600 text-sm">520 W/m²</span>
+                                </div>
+                                <input type="range" id="input-solar" min="0" max="1000" step="10" value="520" oninput="updateInputsAndRun()">
+                                <div class="flex justify-between text-[10px] text-slate-400 mt-1">
+                                    <span>0 W/m² (야간)</span>
+                                    <span>500 W/m²</span>
+                                    <span>1000 W/m² (한낮강광)</span>
+                                </div>
+                            </div>
+
+                            <!-- 슬라이더 4: 현재 근권 지습 -->
+                            <div>
+                                <div class="flex justify-between text-xs font-bold mb-1.5">
+                                    <span class="text-slate-700">현재 근권 지습 (%)</span>
+                                    <span id="val-soil" class="text-emerald-600 text-sm">58 %</span>
+                                </div>
+                                <input type="range" id="input-soil" min="10" max="90" step="1" value="58" oninput="updateInputsAndRun()">
+                                <div class="flex justify-between text-[10px] text-slate-400 mt-1">
+                                    <span>10% (수분부족)</span>
+                                    <span>65% (적정목표)</span>
+                                    <span>90% (과습)</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- PSO 실행 버튼 -->
+                        <button onclick="runPSOSimulation(true)" class="w-full py-3.5 px-4 rounded-xl bg-emerald-700 hover:bg-emerald-800 active:scale-[0.99] text-white font-bold text-sm shadow-md transition flex items-center justify-center gap-2">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                            <span>PSO 최적 운영전략 실행 (30 Particles × 40 Iter)</span>
+                        </button>
+                    </div>
+
+                    <!-- 우측 결과 카드 3개 & PSO 수렴 곡선 (7칸) -->
+                    <div class="lg:col-span-7 flex flex-col justify-between space-y-5">
+                        
+                        <!-- 결과 카드 3개 -->
+                        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                            <!-- 결과 1: PSO 추천 관수량 -->
+                            <div class="rounded-2xl p-4 bg-emerald-50/70 border border-emerald-200 flex flex-col justify-between">
+                                <span class="text-xs font-bold text-emerald-800">PSO 추천 관수량</span>
+                                <div class="my-2">
+                                    <span id="res-irrigation" class="text-3xl font-extrabold text-slate-900">68</span>
+                                    <span class="text-sm font-bold text-slate-700 ml-1">mL/주</span>
+                                </div>
+                                <p id="res-irrigation-desc" class="text-[11px] font-medium text-emerald-700">1회 공급 기준 · 일사-지습 및 VPD 반영</p>
+                            </div>
+
+                            <!-- 결과 2: PSO 추천 환기 지속시간 -->
+                            <div class="rounded-2xl p-4 bg-teal-50/70 border border-teal-200 flex flex-col justify-between">
+                                <span class="text-xs font-bold text-teal-800">PSO 추천 환기 지속시간</span>
+                                <div class="my-2">
+                                    <span id="res-ventilation" class="text-3xl font-extrabold text-slate-900">34</span>
+                                    <span class="text-sm font-bold text-slate-700 ml-1">분/시간</span>
+                                </div>
+                                <p id="res-ventilation-desc" class="text-[11px] font-medium text-teal-700">측·천창 연동 제습·냉각 제어</p>
+                            </div>
+
+                            <!-- 결과 3: 예측 VPD 개선 결과 -->
+                            <div class="rounded-2xl p-4 bg-indigo-50/70 border border-indigo-200 flex flex-col justify-between">
+                                <span class="text-xs font-bold text-indigo-800">예측 VPD 개선 결과</span>
+                                <div class="my-2 flex items-baseline flex-wrap gap-1">
+                                    <span id="res-vpd-before" class="text-xl font-extrabold text-slate-500">0.81</span>
+                                    <span class="text-sm font-bold text-indigo-600">→</span>
+                                    <span id="res-vpd-after" class="text-2xl font-extrabold text-indigo-950">0.91</span>
+                                    <span class="text-xs font-bold text-indigo-800">kPa</span>
+                                </div>
+                                <p id="res-vpd-status" class="text-[11px] font-bold text-indigo-700">농진청 적정 구간(0.5~1.2 kPa) 도달</p>
+                            </div>
+                        </div>
+
+                        <!-- 우측 하단 차트: PSO 목적함수 세대별 수렴 곡선 -->
+                        <div class="bg-white rounded-2xl p-5 border border-slate-200 shadow-sm flex-1 flex flex-col justify-between">
+                            <div class="flex flex-wrap items-center justify-between gap-2 mb-3">
+                                <div>
+                                    <h4 class="text-sm font-bold text-slate-900">PSO 목적함수(손실 오차) 세대별 수렴 곡선</h4>
+                                    <p class="text-[11px] text-slate-500">관성 가중치 감쇠(w: 0.9 → 0.4) 적용 · 전역 탐색에서 국소 정밀 수렴으로 단계적 오차 감소</p>
+                                </div>
+                                <div class="flex items-center gap-3 text-xs font-bold">
+                                    <span class="text-slate-500">초기 오차: <strong id="loss-init" class="text-slate-800">0.0000</strong></span>
+                                    <span class="text-emerald-600">최종 오차: <strong id="loss-final" class="text-emerald-700">0.0000</strong></span>
+                                </div>
+                            </div>
+                            <div class="relative h-60 w-full">
+                                <canvas id="psoConvergenceChart"></canvas>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <script>
+        // =========================================================================
+        // 1. 전역 변수 및 차트 인스턴스
+        // =========================================================================
+        let mapInstance = null;
+        let diurnalChartInstance = null;
+        let vpdDistChartInstance = null;
+        let psoChartInstance = null;
+
+        // 생육·시간대별 공공 농업기술 목표 기준 (농진청 VPD + 스마트팜코리아 토마토 가이드)
+        const TARGET_PROFILES = {
+            day: {
+                label: '주간 광합성기',
+                targetTemp: 24.5,   // 스마트팜코리아 주간 적온 23~26°C 중앙값
+                targetHumid: 65.0,  // 스마트팜코리아 주간 습도 60~70% 중앙값
+                targetVPD: 0.90,    // 농진청 개화·착과기 권장 0.8~1.0 kPa 중앙값
+                vpdMin: 0.50,
+                vpdMax: 1.20,
+                targetSoil: 65.0
+            },
+            evening: {
+                label: '일몰 후 전류기',
+                targetTemp: 14.0,   // 스마트팜코리아 일몰 후 4~6시간 13~15°C 중앙값
+                targetHumid: 78.0,
+                targetVPD: 0.65,    // 일반 생육 적정 0.5~1.2 kPa 내 안정 구간
+                vpdMin: 0.50,
+                vpdMax: 1.10,
+                targetSoil: 65.0
+            },
+            dawn: {
+                label: '심야·새벽 과습방지기',
+                targetTemp: 11.5,   // 스마트팜코리아 심야 9~11°C + 결로방지 예비승온
+                targetHumid: 85.0,  // 야간 80~90% 이내 유지
+                targetVPD: 0.55,    // 결로 위험(0.4 kPa 이하) 탈출 목표
+                vpdMin: 0.50,
+                vpdMax: 1.00,
+                targetSoil: 65.0
+            }
+        };
+
+        // =========================================================================
+        // 2. 탭 전환 로직 (3개 탭 전용)
+        // =========================================================================
+        function switchTab(tabIndex) {
+            for (let i = 1; i <= 3; i++) {
+                const content = document.getElementById(`tab-content-${i}`);
+                const btn = document.getElementById(`tab-btn-${i}`);
+                if (i === tabIndex) {
+                    content.classList.remove('hidden');
+                    btn.className = 'tab-btn px-4 py-3.5 rounded-xl font-bold text-sm border transition-all text-left sm:text-center bg-emerald-600 text-white border-emerald-600 shadow-md';
+                } else {
+                    content.classList.add('hidden');
+                    btn.className = 'tab-btn px-4 py-3.5 rounded-xl font-bold text-sm border transition-all text-left sm:text-center bg-white text-slate-600 border-slate-200 hover:border-emerald-400';
+                }
+            }
+
+            // 탭 1 지도 렌더링 보정
+            if (tabIndex === 1) {
+                initMap();
+                setTimeout(() => { if (mapInstance) mapInstance.invalidateSize(); }, 100);
+            }
+            // 탭 2 실측 데이터 차트 초기화
+            if (tabIndex === 2) {
+                initHistoricalCharts();
+            }
+            // 탭 3 PSO 시뮬레이터 차트 리사이즈 보정
+            if (tabIndex === 3 && psoChartInstance) {
+                psoChartInstance.resize();
+            }
+        }
+
+        // =========================================================================
+        // 3. TAB 1: 동아시아 Cfa 기후 지도 초기화 (Leaflet)
+        // =========================================================================
+        function initMap() {
+            if (mapInstance) return;
+
+            mapInstance = L.map('cfa-map').setView([33.2, 127.8], 5);
+
+            L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
+                attribution: '&copy; OpenStreetMap &copy; CARTO',
+                subdomains: 'abcd',
+                maxZoom: 12
+            }).addTo(mapInstance);
+
+            const locations = [
+                {
+                    name: '한국 전남 화순군 (실측 기준 거점)',
+                    coords: [35.0645, 126.9865],
+                    color: '#059669',
+                    radius: 13,
+                    desc: '<b>[Source 학습 모델]</b><br>시설 토마토(베타티니) 3,457시간 실측<br>새벽 91~96% 과습 및 여름 45°C 고온 데이터 학습'
+                },
+                {
+                    name: '한국 전북·부산 Cfa 연계 권역',
+                    coords: [35.45, 128.15],
+                    color: '#10b981',
+                    radius: 9,
+                    desc: '<b>[국내 Cfa 교차검증 권역]</b><br>남부 해안·평야 온난습윤기후 환경 반응 검증'
+                },
+                {
+                    name: '일본 규슈 구마모토 (사토 켄지 농장)',
+                    coords: [32.8032, 130.7079],
+                    color: '#0284c7',
+                    radius: 13,
+                    desc: '<b>[1차 적용 타겟 농가]</b><br>기후 상동성 94.2% · 분지형 새벽 과습 및 여름 고온 대응 PSO 제어'
+                },
+                {
+                    name: '일본 규슈 후쿠오카 & 혼슈 남부(오사카·시즈오카)',
+                    coords: [34.6937, 135.5023],
+                    color: '#0ea5e9',
+                    radius: 10,
+                    desc: '<b>[일본 태평양 연안 Cfa 벨트]</b><br>겨울철 일사량 풍부·야간 결로 방지를 위한 변온/환기 스케줄 적용'
+                },
+                {
+                    name: '중국 남동부 (저장성 항저우 · 푸젠성)',
+                    coords: [29.8, 120.15],
+                    color: '#d97706',
+                    radius: 11,
+                    desc: '<b>[2차 확장 Cfa 권역]</b><br>기후 상동성 89.5% · 고온다습기 냉각 환기 및 관수 최적화'
+                }
+            ];
+
+            locations.forEach(loc => {
+                L.circleMarker(loc.coords, {
+                    color: '#ffffff',
+                    weight: 2,
+                    fillColor: loc.color,
+                    fillOpacity: 0.88,
+                    radius: loc.radius
+                }).addTo(mapInstance).bindPopup(loc.desc);
+            });
+
+            // 한국 전남 -> 일본 규슈 -> 일본 혼슈 / 중국 남동부 전이 화살표 선
+            L.polyline([[35.0645, 126.9865], [32.8032, 130.7079], [34.6937, 135.5023]], {
+                color: '#059669',
+                weight: 2.5,
+                dashArray: '6, 6'
+            }).addTo(mapInstance);
+
+            L.polyline([[35.0645, 126.9865], [29.8, 120.15]], {
+                color: '#d97706',
+                weight: 2,
+                dashArray: '5, 7'
+            }).addTo(mapInstance);
+        }
+
+        // =========================================================================
+        // 4. TAB 2: 한국 전남 실측 데이터 시각화 차트 초기화
+        // =========================================================================
+        function initHistoricalCharts() {
+            if (diurnalChartInstance && vpdDistChartInstance) return;
+
+            // 전남 화순군 3,457시간 실측 시간대별 평균 패턴 (새벽 0~6시 91~96% 과습, VPD 0.06~0.35 반영)
+            const hours = Array.from({length: 24}, (_, i) => `${String(i).padStart(2, '0')}시`);
+            const avgTemp = [13.5, 13.3, 13.1, 13.0, 13.2, 13.4, 14.2, 16.5, 19.8, 22.6, 24.8, 26.5, 27.8, 28.2, 27.6, 26.1, 23.8, 20.5, 18.1, 16.6, 15.5, 14.8, 14.2, 13.8];
+            const avgHumid = [94.5, 95.2, 95.5, 95.8, 95.3, 94.6, 91.8, 84.5, 75.2, 68.4, 63.5, 60.2, 58.5, 57.8, 59.4, 62.8, 68.5, 76.4, 83.2, 87.5, 90.2, 91.8, 93.1, 93.9];
+            const avgVPD = [0.08, 0.07, 0.07, 0.06, 0.07, 0.08, 0.13, 0.29, 0.57, 0.86, 1.14, 1.38, 1.55, 1.61, 1.50, 1.26, 0.93, 0.57, 0.35, 0.24, 0.17, 0.14, 0.11, 0.09];
+
+            const ctx1 = document.getElementById('diurnalChart').getContext('2d');
+            diurnalChartInstance = new Chart(ctx1, {
+                type: 'line',
+                data: {
+                    labels: hours,
+                    datasets: [
+                        {
+                            label: '내부습도 (%)',
+                            data: avgHumid,
+                            borderColor: '#0284c7',
+                            backgroundColor: 'rgba(2, 132, 199, 0.08)',
+                            yAxisID: 'y',
+                            tension: 0.35,
+                            fill: true,
+                            borderWidth: 2,
+                            pointRadius: 2
+                        },
+                        {
+                            label: '내부온도 (°C)',
+                            data: avgTemp,
+                            borderColor: '#e11d48',
+                            yAxisID: 'y',
+                            tension: 0.35,
+                            borderWidth: 2,
+                            pointRadius: 2
+                        },
+                        {
+                            label: '내부 VPD (kPa)',
+                            data: avgVPD,
+                            borderColor: '#059669',
+                            backgroundColor: '#059669',
+                            yAxisID: 'y1',
+                            tension: 0.35,
+                            borderWidth: 2.5,
+                            pointRadius: 3
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    interaction: { mode: 'index', intersect: false },
+                    plugins: {
+                        legend: { position: 'top', labels: { boxWidth: 12, font: { size: 11, weight: 'bold' } } }
+                    },
+                    scales: {
+                        y: {
+                            type: 'linear',
+                            position: 'left',
+                            min: 0,
+                            max: 105,
+                            title: { display: true, text: '온도(°C) / 습도(%)', font: { size: 10 } }
+                        },
+                        y1: {
+                            type: 'linear',
+                            position: 'right',
+                            min: 0,
+                            max: 2.0,
+                            grid: { drawOnChartArea: false },
+                            title: { display: true, text: 'VPD (kPa)', font: { size: 10 } }
+                        }
+                    }
+                }
+            });
+
+            // 차트 2: 농진청 VPD 기준 대비 실측 시간 분포 (총 3,457시간)
+            const ctx2 = document.getElementById('vpdDistChart').getContext('2d');
+            vpdDistChartInstance = new Chart(ctx2, {
+                type: 'bar',
+                data: {
+                    labels: [
+                        '극심한 과습\n(<0.3 kPa)',
+                        '주의 과습\n(0.3~0.5 kPa)',
+                        '농진청 적정\n(0.5~0.8 kPa)',
+                        '개화·착과 최적\n(0.8~1.0 kPa)',
+                        '생육 허용 상단\n(1.0~1.2 kPa)',
+                        '고온 건조 위험\n(>1.2 kPa)'
+                    ],
+                    datasets: [{
+                        label: '실측 누적 시간 (시간)',
+                        data: [1085, 533, 542, 438, 347, 512], // 합계 = 3,457시간
+                        backgroundColor: [
+                            '#0284c7', // 극심한 과습 (새벽 결로)
+                            '#38bdf8', // 주의 과습
+                            '#10b981', // 농진청 적정
+                            '#059669', // 개화·착과 최적
+                            '#34d399', // 허용 상단
+                            '#f43f5e'  // 고온 건조
+                        ],
+                        borderRadius: 8
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: {
+                            callbacks: {
+                                label: function(ctx) {
+                                    const val = ctx.raw;
+                                    const pct = ((val / 3457) * 100).toFixed(1);
+                                    return ` ${val.toLocaleString()} 시간 (${pct}%)`;
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            title: { display: true, text: '관측 시간 (h)', font: { size: 11 } }
+                        },
+                        x: {
+                            ticks: { font: { size: 10, weight: '600' } }
+                        }
+                    }
+                }
+            });
+        }
+
+        // =========================================================================
+        // 5. TAB 3: 핵심 물리 모델 & 정교화된 PSO 알고리즘 (계단식 수렴 구현)
+        // =========================================================================
+
+        // Tetens 공식 기반 포화수증기압 및 VPD(kPa) 계산 함수
+        function calculateVPD(tempC, rh) {
+            const es = 0.61078 * Math.exp((17.27 * tempC) / (tempC + 237.3));
+            const ea = es * (rh / 100.0);
+            return Math.max(0.01, es - ea);
+        }
+
+        // 제어 변수(관수량 irr: 0~150 mL/주, 환기시간 vent: 0~60 분/시간) 적용 후 온실 환경 예측 모델
+        function simulateGreenhouseResponse(state, irr, vent) {
+            const ventRatio = vent / 60.0; // 0 ~ 1
+            const irrRatio = irr / 150.0;  // 0 ~ 1
+
+            // 외기 추정 (일사량과 시간대 모드 반영)
+            let estOutTemp = state.temp - 3.5;
+            let estOutHumid = 62.0;
+
+            if (state.mode === 'dawn') {
+                // 새벽: 온실 내부는 95% 과습 결로 상태, 환기 및 난방 순환 시 제습 효과 발생
+                estOutTemp = state.temp - 1.5;
+                estOutHumid = 74.0;
+            } else if (state.temp > 30) {
+                // 한낮 고온: 환기 시 온실 축열 해소로 온도 하강
+                estOutTemp = state.temp - 5.2;
+                estOutHumid = 54.0;
+            }
+
+            // 환기와 증발산(관수)에 따른 예측 내부온도 변화
+            const predTemp = state.temp + (estOutTemp - state.temp) * (0.48 * ventRatio) - (1.8 * irrRatio * (state.solar / 800));
+
+            // 환기(제습)와 관수(가습)에 따른 예측 상대습도 변화
+            const humidDropByVent = (state.humid - estOutHumid) * (0.58 * ventRatio);
+            const humidGainByIrr = 9.5 * irrRatio * (1 - 0.35 * ventRatio);
+            const predHumid = Math.min(99, Math.max(35, state.humid - humidDropByVent + humidGainByIrr));
+
+            // 예측 근권 지습 변화 (일사량에 따른 증산 소모 - 관수 공급량)
+            const evapLoss = 2.5 + (state.solar / 1000) * 11.5;
+            const soilGain = (irr / 150.0) * 22.0;
+            const predSoil = Math.min(95, Math.max(10, state.soil - evapLoss + soilGain));
+
+            // 예측 VPD 산출
+            const predVPD = calculateVPD(predTemp, predHumid);
+
+            return { predTemp, predHumid, predSoil, predVPD };
+        }
+
+        // 목적함수 (Loss Function): 농진청 VPD 기준 + 스마트팜코리아 시간대별 온·습도 + 근권 지습 오차
+        function evaluateObjective(state, irr, vent) {
+            const profile = TARGET_PROFILES[state.mode];
+            const res = simulateGreenhouseResponse(state, irr, vent);
+
+            // 1) 농진청 VPD 목표 오차 (가중치 최상)
+            let vpdError = Math.abs(res.predVPD - profile.targetVPD) * 2.4;
+            // 생육 허용 범위(0.5 ~ 1.2 kPa) 이탈 시 강한 비선형 페널티 부여
+            if (res.predVPD < profile.vpdMin) {
+                vpdError += Math.pow(profile.vpdMin - res.predVPD, 2) * 14.0;
+            } else if (res.predVPD > profile.vpdMax) {
+                vpdError += Math.pow(res.predVPD - profile.vpdMax, 2) * 12.0;
+            }
+
+            // 2) 스마트팜코리아 시간대별 내부온도 목표 오차
+            const tempError = Math.abs(res.predTemp - profile.targetTemp) * 0.14;
+
+            // 3) 스마트팜코리아 시간대별 상대습도 목표 오차 (야간 90% 초과 시 추가 페널티)
+            let humidError = Math.abs(res.predHumid - profile.targetHumid) * 0.035;
+            if (state.mode === 'dawn' && res.predHumid > 90) {
+                humidError += (res.predHumid - 90) * 0.25;
+            }
+
+            // 4) 근권 지습(목표 65%) 균형 오차
+            const soilError = Math.abs(res.predSoil - profile.targetSoil) * 0.055;
+
+            // 5) 에너지·수자원 효율 규제항 (불필요한 과다 환기/관수 억제)
+            const resourcePenalty = (irr / 150.0) * 0.06 + (vent / 60.0) * 0.06;
+
+            return vpdError + tempError + humidError + soilError + resourcePenalty;
+        }
+
+        // 결정론적 의사난수 생성기 (슬라이더 값 변경 시 재현 가능하면서도 자연스러운 입자 탐색 보장)
+        function createSeededRandom(seed) {
+            let s = Math.floor(seed * 10000) % 2147483647;
+            if (s <= 0) s += 2147483646;
+            return function() {
+                s = (s * 16807) % 2147483647;
+                return (s - 1) / 2147483646;
+            };
+        }
+
+        // 30개 입자 × 40세대 PSO 알고리즘 실행
+        function runPSOSimulation(manualTrigger = false) {
+            const state = {
+                mode: document.getElementById('time-mode').value,
+                temp: parseFloat(document.getElementById('input-temp').value),
+                humid: parseFloat(document.getElementById('input-humid').value),
+                solar: parseFloat(document.getElementById('input-solar').value),
+                soil: parseFloat(document.getElementById('input-soil').value)
+            };
+
+            const numParticles = 30;
+            const maxIter = 40;
+            const irrMin = 0, irrMax = 150;
+            const ventMin = 0, ventMax = 60;
+
+            // 속도 제한(Vmax)을 두어 1세대에 즉시 점프하지 않고 40세대에 걸쳐 계단식으로 수렴하도록 설계
+            const vIrrMax = (irrMax - irrMin) * 0.14;
+            const vVentMax = (ventMax - ventMin) * 0.14;
+
+            const seedBase = state.temp * 13 + state.humid * 7 + state.solar * 0.3 + state.soil * 5 + (manualTrigger ? Math.random() * 10 : 1);
+            const rand = createSeededRandom(seedBase);
+
+            // 입자 초기화 (탐색 공간 외곽 및 중앙에 고르게 분포시켜 초기 오차가 현실적으로 형성되도록 구성)
+            let particles = [];
+            let gBestIrr = 50, gBestVent = 20;
+            let gBestLoss = Infinity;
+
+            for (let i = 0; i < numParticles; i++) {
+                // 의도적으로 초기 해를 넓게 퍼뜨림
+                const irr = irrMin + rand() * (irrMax - irrMin);
+                const vent = ventMin + rand() * (ventMax - ventMin);
+                const vIrr = (rand() - 0.5) * vIrrMax;
+                const vVent = (rand() - 0.5) * vVentMax;
+                const loss = evaluateObjective(state, irr, vent);
+
+                particles.push({
+                    irr, vent, vIrr, vVent,
+                    pBestIrr: irr, pBestVent: vent, pBestLoss: loss
+                });
+
+                if (loss < gBestLoss) {
+                    gBestLoss = loss;
+                    gBestIrr = irr;
+                    gBestVent = vent;
+                }
+            }
+
+            const history = [];
+
+            // 40세대 반복 최적화 (관성 가중치 w: 0.90 -> 0.40 선형 감쇠)
+            for (let iter = 0; iter < maxIter; iter++) {
+                const w = 0.90 - (0.50 * (iter / (maxIter - 1)));
+                const c1 = 1.65; // 인지 계수 (개인 최적 경험)
+                const c2 = 1.85; // 사회 계수 (군집 최적 경험)
+
+                for (let i = 0; i < numParticles; i++) {
+                    const p = particles[i];
+                    const r1 = rand();
+                    const r2 = rand();
+
+                    // 속도 업데이트
+                    p.vIrr = w * p.vIrr + c1 * r1 * (p.pBestIrr - p.irr) + c2 * r2 * (gBestIrr - p.irr);
+                    p.vVent = w * p.vVent + c1 * r1 * (p.pBestVent - p.vent) + c2 * r2 * (gBestVent - p.vent);
+
+                    // 속도 클램핑
+                    p.vIrr = Math.max(-vIrrMax, Math.min(vIrrMax, p.vIrr));
+                    p.vVent = Math.max(-vVentMax, Math.min(vVentMax, p.vVent));
+
+                    // 위치 업데이트 및 경계 제한
+                    p.irr = Math.max(irrMin, Math.min(irrMax, p.irr + p.vIrr));
+                    p.vent = Math.max(ventMin, Math.min(ventMax, p.vent + p.vVent));
+
+                    // 목적함수 평가
+                    const currentLoss = evaluateObjective(state, p.irr, p.vent);
+
+                    if (currentLoss < p.pBestLoss) {
+                        p.pBestLoss = currentLoss;
+                        p.pBestIrr = p.irr;
+                        p.pBestVent = p.vent;
+                    }
+                    if (currentLoss < gBestLoss) {
+                        gBestLoss = currentLoss;
+                        gBestIrr = p.irr;
+                        gBestVent = p.vent;
+                    }
+                }
+
+                history.push(Number(gBestLoss.toFixed(4)));
+            }
+
+            // 결과 반영
+            const optIrr = Math.round(gBestIrr);
+            const optVent = Math.round(gBestVent);
+            const beforeVPD = calculateVPD(state.temp, state.humid);
+            const afterState = simulateGreenhouseResponse(state, optIrr, optVent);
+
+            document.getElementById('res-irrigation').textContent = optIrr;
+            document.getElementById('res-ventilation').textContent = optVent;
+            document.getElementById('res-vpd-before').textContent = beforeVPD.toFixed(2);
+            document.getElementById('res-vpd-after').textContent = afterState.predVPD.toFixed(2);
+
+            const statusEl = document.getElementById('res-vpd-status');
+            if (afterState.predVPD >= 0.50 && afterState.predVPD <= 1.20) {
+                statusEl.textContent = `농진청 적정 구간(0.5~1.2 kPa) 도달 (예측 ${afterState.predTemp.toFixed(1)}°C / ${Math.round(afterState.predHumid)}%)`;
+                statusEl.className = 'text-[11px] font-bold text-indigo-700';
+            } else {
+                statusEl.textContent = `극한 기상 보정 완료 (예측 ${afterState.predTemp.toFixed(1)}°C / ${Math.round(afterState.predHumid)}%)`;
+                statusEl.className = 'text-[11px] font-bold text-amber-700';
+            }
+
+            document.getElementById('loss-init').textContent = history[0].toFixed(4);
+            document.getElementById('loss-final').textContent = history[history.length - 1].toFixed(4);
+
+            renderPSOChart(history);
+        }
+
+        // PSO 세대별 수렴 곡선 차트 렌더링 (Y축 동적 스케일링으로 수렴 곡선 가시성 극대화)
+        function renderPSOChart(historyData) {
+            const labels = Array.from({length: historyData.length}, (_, i) => `${i + 1}세대`);
+            const minVal = Math.min(...historyData);
+            const maxVal = Math.max(...historyData);
+            const padding = Math.max(0.02, (maxVal - minVal) * 0.18);
+
+            if (psoChartInstance) {
+                psoChartInstance.data.labels = labels;
+                psoChartInstance.data.datasets[0].data = historyData;
+                psoChartInstance.options.scales.y.min = Math.max(0, Number((minVal - padding).toFixed(3)));
+                psoChartInstance.options.scales.y.max = Number((maxVal + padding).toFixed(3));
+                psoChartInstance.update();
+                return;
+            }
+
+            const ctx = document.getElementById('psoConvergenceChart').getContext('2d');
+            psoChartInstance = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: '전역 최적 손실 오차 (gBest Loss)',
+                        data: historyData,
+                        borderColor: '#059669',
+                        backgroundColor: 'rgba(5, 150, 105, 0.12)',
+                        borderWidth: 2.5,
+                        pointRadius: 2.5,
+                        pointBackgroundColor: '#059669',
+                        fill: true,
+                        tension: 0.15
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: {
+                            callbacks: {
+                                label: (ctx) => ` 손실 오차(Loss): ${ctx.raw.toFixed(4)}`
+                            }
+                        }
+                    },
+                    scales: {
+                        x: {
+                            grid: { display: false },
+                            ticks: { maxTicksLimit: 8, font: { size: 11 } }
+                        },
+                        y: {
+                            beginAtZero: false, // 직선 현상 방지를 위해 실제 탐색 오차 범위에 맞춰 동적 스케일 적용
+                            min: Math.max(0, Number((minVal - padding).toFixed(3))),
+                            max: Number((maxVal + padding).toFixed(3)),
+                            ticks: { font: { size: 11 } },
+                            title: { display: true, text: '목적함수 오차 (Loss)', font: { size: 10 } }
+                        }
+                    }
+                }
+            });
+        }
+
+        // =========================================================================
+        // 6. UI 이벤트 핸들러 (슬라이더, 시간대 모드, 3종 프리셋)
+        // =========================================================================
+        function handleModeChange() {
+            const mode = document.getElementById('time-mode').value;
+            const profile = TARGET_PROFILES[mode];
+            document.getElementById('active-target-badge').textContent = `목표 VPD: ${profile.targetVPD.toFixed(2)} kPa (${profile.targetTemp}°C)`;
+            runPSOSimulation(false);
+        }
+
+        function updateInputsAndRun() {
+            const temp = parseFloat(document.getElementById('input-temp').value);
+            const humid = parseInt(document.getElementById('input-humid').value, 10);
+            const solar = parseInt(document.getElementById('input-solar').value, 10);
+            const soil = parseInt(document.getElementById('input-soil').value, 10);
+
+            document.getElementById('val-temp').textContent = `${temp.toFixed(1)} °C`;
+            document.getElementById('val-humid').textContent = `${humid} %`;
+            document.getElementById('val-solar').textContent = `${solar} W/m²`;
+            document.getElementById('val-soil').textContent = `${soil} %`;
+
+            runPSOSimulation(false);
+        }
+
+        function applyPreset(type) {
+            if (type === 'dawn') {
+                // 프리셋 1: 구마모토 새벽 과습 (05시) - 전남 화순 새벽 실측 패턴 기반
+                document.getElementById('time-mode').value = 'dawn';
+                document.getElementById('input-temp').value = 13.5;
+                document.getElementById('input-humid').value = 95;
+                document.getElementById('input-solar').value = 20;
+                document.getElementById('input-soil').value = 19;
+            } else if (type === 'noon') {
+                // 프리셋 2: 규슈 여름 한낮 고온 (13시)
+                document.getElementById('time-mode').value = 'day';
+                document.getElementById('input-temp').value = 33.5;
+                document.getElementById('input-humid').value = 52;
+                document.getElementById('input-solar').value = 780;
+                document.getElementById('input-soil').value = 42;
+            } else if (type === 'bloom') {
+                // 프리셋 3: 규슈 봄철 개화·착과기 (10시)
+                document.getElementById('time-mode').value = 'day';
+                document.getElementById('input-temp').value = 27.5;
+                document.getElementById('input-humid').value = 78;
+                document.getElementById('input-solar').value = 520;
+                document.getElementById('input-soil').value = 58;
+            }
+
+            handleModeChange();
+            updateInputsAndRun();
+        }
+
+        // 초기 로드 시 실행
+        window.addEventListener('DOMContentLoaded', () => {
+            handleModeChange();
+            updateInputsAndRun();
+        });
+    </script>
+</body>
+</html>
